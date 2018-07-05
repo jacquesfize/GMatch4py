@@ -49,6 +49,6 @@ setup(
     packages=["gmatch4py", "gmatch4py.ged", "gmatch4py.kernels"],
     ext_modules=extensions,
     cmdclass={'build_ext': build_ext},
-    setup_requires=["numpy"],
-    install_requires=["numpy"]
+    setup_requires=["numpy","networkx"],
+    install_requires=["numpy","networkx"]
 )

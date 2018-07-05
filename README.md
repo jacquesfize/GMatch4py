@@ -1,12 +1,44 @@
 # Gmatch4py a graph matching library for Python
 
-Gmatch4py is a library dedicated to graph matching. Graph structure are stored in NetworkX.Graph objects.
+Gmatch4py is a library dedicated to graph matching. Graph structure are stored in NetworkX graph objects.
 
-## List of algorithm
+
+## Requirements
+ 
+ * Python3
+ * Cython
+ * networkit (for Bag of Cliques)
+ 
+## Installation
+
+First, compile the library by running this command:
+
+```
+$ python3 setup.py build_ext
+```
+
+Then, install the compiled module with:
+
+```
+$ pip3 install .
+```
+
+## Get Started
+
+For now, every algorithms class is composed with a static method called `compare()`. `compare()` takes
+two arguments :
+
+ * An array containing the graphs to compare
+ * An array containing indexes of graph you want to compare. Set to `None`, if you want to
+ measure the similarity/distance between every graphs. 
+
+
+## List of algorithms
 
  * DeltaCon and DeltaCon0 (*debug needed*) [1]
  * Vertex Ranking (*debug needed*) [2]
  * Vertex Edge Overlap [2]
+ * Bag of Cliques (a bag of words model using cliques as vocabulary)
  * Graph kernels
     * Random Walk Kernel (*debug needed*) [3]
         * Geometrical 
@@ -34,10 +66,19 @@ Gmatch4py is a library dedicated to graph matching. Graph structure are stored i
   * [5] Fischer, A., Riesen, K., & Bunke, H. (2017). Improved quadratic time approximation of graph edit distance by combining Hausdorff matching and greedy assignment. Pattern Recognition Letters, 87, 55-62.
   * [6] A graph distance metric based on the maximal common subgraph, H. Bunke and K. Shearer, Pattern Recognition Letters, 1998  
 
-## Authors
+## Author(s)
 
-Jacques Fize
+Jacques Fize, *jacques[dot]fize[at]cirad[dot]fr*
 
-## TODO
+Some algorithms coming from other projects were integrated to Gmatch4py. **Be assured that
+each code is associated with a reference to the original.**
+
+## TODO List
 
   * Debug algorithms with --> (*debug needed*)
+  * Improve code structure and performance
+  * Simplify `setup.py`
+  * Some algorithms are distance and others are similarity measure. Must change the compare
+  methods so it can adapt to the user need. For example, maybe the user want to deal with 
+  graph similarity rather than distance between graph.
+  * Write the documentation
