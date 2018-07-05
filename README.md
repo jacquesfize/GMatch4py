@@ -47,8 +47,6 @@ two arguments :
     * Weisfeiler-Lehman Kernel [4]
         * Subtree Kernel 
         * Edge Kernel
-        * Subtree Geo Kernel [new]
-        * Edge Geo Kernel [new]
  * Graph Edit Distance [5]
     * Approximated Graph Edit Distance 
     * Hausdorff Graph Edit Distance 
