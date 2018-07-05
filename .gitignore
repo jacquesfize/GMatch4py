@@ -105,3 +105,4 @@ venv.bak/
 *.cpp
 *.c
 .DS_Store
+.idea
