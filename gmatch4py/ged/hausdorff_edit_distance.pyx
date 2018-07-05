@@ -1,0 +1,171 @@
+# coding = utf-8
+
+import numpy as np
+cimport numpy as np
+#from libcpp.list cimport list as cpplist
+cdef class HED:
+    """
+    Implementation of Hausdorff Edit Distance described in
+
+    Improved quadratic time approximation of graph edit distance by Hausdorff matching and greedy assignement
+    Andreas Fischer, Kaspar Riesen, Horst Bunke
+    2016
+    """
+
+    cdef int node_del
+    cdef int node_ins
+    cdef int edge_del
+    cdef int edge_ins
+
+    __type__ = "dist"
+    @staticmethod
+    def compare(list listgs, selected, int c_del_node=1, int c_del_edge=1, int c_ins_node=1, int c_ins_edge=1):
+        cdef int n = len(listgs)
+        comparator = HED(c_del_node, c_ins_node, c_del_edge, c_ins_edge)
+        cdef np.ndarray comparison_matrix = np.zeros((n, n))
+        for i in range(n):
+            for j in range(i, n):
+                f=True
+                if not listgs[i] or not listgs[j]:
+                    f=False
+                elif len(listgs[i])== 0 or len(listgs[j]) == 0:
+                    f=False
+                if selected:
+                    if not i in selected:
+                        f=False
+                if f:
+                    comparison_matrix[i, j] = comparator.hed(listgs[i], listgs[j])
+                else:
+                    comparison_matrix[i, j] = np.inf
+                comparison_matrix[j, i] = comparison_matrix[i, j]
+
+        return comparison_matrix
+
+
+    def __init__(self, int node_del=1, int node_ins=1, int edge_del=1, int edge_ins=1):
+        """Constructor for HED"""
+        self.node_del = node_del
+        self.node_ins = node_ins
+        self.edge_del = edge_del
+        self.edge_ins = edge_ins
+
+    cpdef float hed(self, g1, g2):
+        """
+        Compute de Hausdorff Edit Distance
+        :param g1: first graph
+        :param g2: second graph
+        :return:
+        """
+        return self.sum_fuv(g1, g2) + self.sum_fuv(g2, g1)
+
+    cdef float sum_fuv(self, g1, g2):
+        """
+        Compute Nearest Neighbour Distance between G1 and G2
+        :param g1: First Graph
+        :param g2: Second Graph
+        :return:
+        """
+        cdef np.ndarray min_sum = np.zeros(len(g1))
+        nodes1 = list(g1.nodes)
+        nodes2 = list(g2.nodes)
+        nodes2.extend([None])
+        cdef np.ndarray min_i
+        for i in range(len(nodes1)):
+            min_i = np.zeros(len(nodes2))
+            for j in range(len(nodes2)):
+                min_i[j] = self.fuv(g1, g2, nodes1[i], nodes2[j])
+            min_sum[i] = np.min(min_i)
+        return np.sum(min_sum)
+
+    cdef float fuv(self, g1, g2, n1, n2):
+        """
+        Compute the Node Distance function
+        :param g1: first graph
+        :param g2: second graph
+        :param n1: node of the first graph
+        :param n2: node of the second graph
+        :return:
+        """
+        if n2 == None:  # Del
+            return self.node_del + ((self.edge_del / 2) * g1.degree(n1))
+        if n1 == None:  # Insert
+            return self.node_ins + ((self.edge_ins / 2) * g2.degree(n2))
+        else:
+            if n1 == n2:
+                return 0
+            return (self.node_del + self.node_ins + self.hed_edge(g1, g2, n1, n2)) / 2
+
+    cdef float hed_edge(self, g1, g2, n1, n2):
+        """
+        Compute HEDistance between edges of n1 and n2, respectively in g1 and g2
+        :param g1: first graph
+        :param g2: second graph
+        :param n1: node of the first graph
+        :param n2: node of the second graph
+        :return:
+        """
+        return self.sum_gpq(g1, n1, g2, n2) + self.sum_gpq(g1, n1, g2, n2)
+
+    cdef list get_edge_multigraph(self, g, node):
+        """
+        Get list of edge around a node in a Multigraph
+        :param g: multigraph
+        :param node: node in the multigraph
+        :return:
+        """
+
+        cdef list originals_ = g.edges(node, data=True)
+        cdef int n= len(originals_)
+        if n == 0:
+            return []
+
+
+        cdef list edges = [""]*n
+        for i in range(n):
+            edge=originals_[i]
+            edges[i]=("{0}-{1}".format(edge[0],edge[1]))
+        return edges
+
+    cdef float  sum_gpq(self, g1, n1, g2, n2):
+        """
+        Compute Nearest Neighbour Distance between edges around n1 in G1  and edges around n2 in G2
+        :param g1: first graph
+        :param n1: node in the first graph
+        :param g2: second graph
+        :param n2: node in the second graph
+        :return:
+        """
+
+        #if isinstance(g1, nx.MultiDiGraph):
+        cdef list edges1 = self.get_edge_multigraph(g1, n1)
+        cdef list edges2 = self.get_edge_multigraph(g2, n2)
+
+        #else:
+            #edges1 = [str(n1 + "-" + ef) for ef in list(g1.edge[n1].keys())]
+            #edges2 = [str(n2 + "-" + ef) for ef in list(g2.edge[n2].keys())]
+
+        cdef np.ndarray min_sum = np.zeros(len(edges1))
+        edges2.extend([None])
+        cdef np.ndarray min_i
+        for i in range(len(edges1)):
+            min_i = np.zeros(len(edges2))
+            for j in range(len(edges2)):
+                min_i[j] = self.gpq(edges1[i], edges2[j])
+            min_sum[i] = np.min(min_i)
+        return np.sum(min_sum)
+
+    cdef float gpq(self, str e1, str e2):
+        """
+        Compute the edge distance function
+        :param e1: edge1
+        :param e2: edge2
+        :return:
+        """
+        if e2 == None:  # Del
+            return self.edge_del
+        if e1 == None:  # Insert
+            return self.edge_ins
+        else:
+            if e1 == e2:
+                return 0
+            return (self.edge_del + self.edge_ins) / 2
