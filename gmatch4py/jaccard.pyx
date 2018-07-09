@@ -3,9 +3,10 @@
 import numpy as np
 cimport numpy as np
 
+from .base cimport Base
 def intersect(a, b):
     return list(set(a) & set(b))
-class Jaccard():
+class Jaccard(Base):
     __type__ = "sim"
 
 
