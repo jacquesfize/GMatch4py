@@ -9,12 +9,38 @@ except:
     print("You don't seem to have Cython installed. Please get a")
     print("copy from www.cython.org and install it")
     sys.exit(1)
+def scandir(dir, files=[]):
+    for file in os.listdir(dir):
+        path = os.path.join(dir, file)
+        if os.path.isfile(path) and path.endswith(".pyx"):
+            files.append(path.replace(os.path.sep, ".")[:-4])
+        elif os.path.isdir(path):
+            scandir(path, files)
+    return files
+
+
+# generate an Extension object from its dotted name
+def makeExtension(extName):
+    extPath = extName.replace(".", os.path.sep)+".pyx"
+    return Extension(
+        extName,
+        [extPath],include_dirs=[np.get_include()],language='c++'
+        )
+
+# get the list of extensions
+extNames = scandir("gmatch4py")
+
+# and build up the set of Extension objects
+extensions = cythonize([makeExtension(name) for name in extNames])
 
 setup(
     name="Gmatch4py",
     description="A module for graph matching",
-    packages=["gmatch4py", "gmatch4py.ged", "gmatch4py.kernels"],
-    ext_modules=cythonize([Extension("*", ["gmatch4py/*.pyx"],include_dirs=[np.get_include()])]),
+    packages=["gmatch4py"],
+    #ext_modules=cythonize([
+     #   Extension("*", ["gmatch4py/*.pyx"],include_dirs=[np.get_include()])
+    #]),
+    ext_modules=extensions,
     cmdclass={'build_ext': build_ext},
     setup_requires=["numpy","networkx"],
     install_requires=["numpy","networkx"],

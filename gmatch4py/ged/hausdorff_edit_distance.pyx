@@ -2,8 +2,9 @@
 
 import numpy as np
 cimport numpy as np
-#from libcpp.list cimport list as cpplist
-cdef class HED:
+from ..base cimport Base
+
+cdef class HED(Base):
     """
     Implementation of Hausdorff Edit Distance described in
 
@@ -17,24 +18,25 @@ cdef class HED:
     cdef int edge_del
     cdef int edge_ins
 
-    __type__ = "dist"
-    @staticmethod
-    def compare(list listgs, selected, int c_del_node=1, int c_del_edge=1, int c_ins_node=1, int c_ins_edge=1):
+    def __init__(self, int node_del=1, int node_ins=1, int edge_del=1, int edge_ins=1):
+        """Constructor for HED"""
+        Base.__init__(self,1,False)
+        self.node_del = node_del
+        self.node_ins = node_ins
+        self.edge_del = edge_del
+        self.edge_ins = edge_ins
+
+
+    cpdef np.ndarray compare(self,list listgs, list selected):
         cdef int n = len(listgs)
-        comparator = HED(c_del_node, c_ins_node, c_del_edge, c_ins_edge)
-        cdef np.ndarray comparison_matrix = np.zeros((n, n))
+        cdef np.ndarray comparison_matrix = np.zeros((n, n)).astype(float)
+        cdef int i,j
         for i in range(n):
             for j in range(i, n):
-                f=True
-                if not listgs[i] or not listgs[j]:
-                    f=False
-                elif len(listgs[i])== 0 or len(listgs[j]) == 0:
-                    f=False
-                if selected:
-                    if not i in selected:
-                        f=False
+                g1,g2=listgs[i],listgs[j]
+                f=self.isAccepted(g1,i,selected) & self.isAccepted(g2,j,selected)
                 if f:
-                    comparison_matrix[i, j] = comparator.hed(listgs[i], listgs[j])
+                    comparison_matrix[i, j] = self.hed(g1, g2)
                 else:
                     comparison_matrix[i, j] = np.inf
                 comparison_matrix[j, i] = comparison_matrix[i, j]
@@ -42,14 +44,7 @@ cdef class HED:
         return comparison_matrix
 
 
-    def __init__(self, int node_del=1, int node_ins=1, int edge_del=1, int edge_ins=1):
-        """Constructor for HED"""
-        self.node_del = node_del
-        self.node_ins = node_ins
-        self.edge_del = edge_del
-        self.edge_ins = edge_ins
-
-    cpdef float hed(self, g1, g2):
+    cdef float hed(self, g1, g2):
         """
         Compute de Hausdorff Edit Distance
         :param g1: first graph
@@ -87,9 +82,9 @@ cdef class HED:
         :return:
         """
         if n2 == None:  # Del
-            return self.node_del + ((self.edge_del / 2) * g1.degree(n1))
+            return self.node_del + ((self.edge_del / 2.) * g1.degree(n1))
         if n1 == None:  # Insert
-            return self.node_ins + ((self.edge_ins / 2) * g2.degree(n2))
+            return self.node_ins + ((self.edge_ins / 2.) * g2.degree(n2))
         else:
             if n1 == n2:
                 return 0
@@ -106,27 +101,8 @@ cdef class HED:
         """
         return self.sum_gpq(g1, n1, g2, n2) + self.sum_gpq(g1, n1, g2, n2)
 
-    cdef list get_edge_multigraph(self, g, node):
-        """
-        Get list of edge around a node in a Multigraph
-        :param g: multigraph
-        :param node: node in the multigraph
-        :return:
-        """
 
-        cdef list originals_ = g.edges(node, data=True)
-        cdef int n= len(originals_)
-        if n == 0:
-            return []
-
-
-        cdef list edges = [""]*n
-        for i in range(n):
-            edge=originals_[i]
-            edges[i]=("{0}-{1}".format(edge[0],edge[1]))
-        return edges
-
-    cdef float  sum_gpq(self, g1, n1, g2, n2):
+    cdef float sum_gpq(self, g1, n1, g2, n2):
         """
         Compute Nearest Neighbour Distance between edges around n1 in G1  and edges around n2 in G2
         :param g1: first graph
@@ -137,12 +113,8 @@ cdef class HED:
         """
 
         #if isinstance(g1, nx.MultiDiGraph):
-        cdef list edges1 = self.get_edge_multigraph(g1, n1)
-        cdef list edges2 = self.get_edge_multigraph(g2, n2)
-
-        #else:
-            #edges1 = [str(n1 + "-" + ef) for ef in list(g1.edge[n1].keys())]
-            #edges2 = [str(n2 + "-" + ef) for ef in list(g2.edge[n2].keys())]
+        cdef list edges1 = list(g1.edges(n1)) if n1 else []
+        cdef list edges2 =  list(g2.edges(n2)) if n2 else []
 
         cdef np.ndarray min_sum = np.zeros(len(edges1))
         edges2.extend([None])
@@ -154,7 +126,7 @@ cdef class HED:
             min_sum[i] = np.min(min_i)
         return np.sum(min_sum)
 
-    cdef float gpq(self, str e1, str e2):
+    cdef float gpq(self, tuple e1, tuple e2):
         """
         Compute the edge distance function
         :param e1: edge1
@@ -168,4 +140,4 @@ cdef class HED:
         else:
             if e1 == e2:
                 return 0
-            return (self.edge_del + self.edge_ins) / 2
+            return (self.edge_del + self.edge_ins) / 2.

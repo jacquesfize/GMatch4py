@@ -29,6 +29,8 @@ cdef class VertexRanking(Base):
         for i in range(n):
             pager_i=list(page_r[i])
             for j in range(i,n):
+                g1,g2=listgs[i],listgs[j]
+                f=self.isAccepted(g1,i,selected) & self.isAccepted(g2,j,selected)
                 pager_j=list(page_r[j])
                 node_intersection=list(set(pager_i) & set(pager_j))
                 X,Y=[],[]

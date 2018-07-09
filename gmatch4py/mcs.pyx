@@ -17,16 +17,10 @@ cdef class MCS(Base):
         cdef np.ndarray comparison_matrix = np.zeros((n, n))
         for i in range(n):
             for j in range(i, n):
-                f=True
-                if not listgs[i] or not listgs[j]:
-                    f=False
-                elif len(listgs[i])== 0 or len(listgs[j]) == 0:
-                    f=False
-                if selected:
-                    if not i in selected:
-                        f=False
+                g1,g2=listgs[i],listgs[j]
+                f=self.isAccepted(g1,i,selected) & self.isAccepted(g2,j,selected)
                 if f:
-                    comparison_matrix[i, j] = self.s_mcs(listgs[i],listgs[j])
+                    comparison_matrix[i, j] = self.s_mcs(g1,g2)
                 else:
                     comparison_matrix[i, j] = 0.
                 comparison_matrix[j, i] = comparison_matrix[i, j]
