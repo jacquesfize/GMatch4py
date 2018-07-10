@@ -26,9 +26,10 @@ cdef class GraphEditDistance(AbstractGraphEditDistance):
             R2 = nx.create_empty_copy(H)
             R2.add_edges_from(H.edges(node2,data=True))
 
-            return abs(R2.number_of_edges()-intersection(R,R2).number_of_edges())
+            diff=abs(R2.number_of_edges()-intersection(R,R2).number_of_edges())
+            return (diff*self.edge_ins)+(diff*self.edge_del)
         else:
-            return self.node_ins+self.node_del
+            return 0.
 
     cdef double delete_cost(self, int i, int j, nodesG, G):
         if i == j:

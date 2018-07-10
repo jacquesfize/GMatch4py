@@ -9,6 +9,8 @@ except:
     print("You don't seem to have Cython installed. Please get a")
     print("copy from www.cython.org and install it")
     sys.exit(1)
+
+
 def scandir(dir, files=[]):
     for file in os.listdir(dir):
         path = os.path.join(dir, file)
@@ -17,7 +19,6 @@ def scandir(dir, files=[]):
         elif os.path.isdir(path):
             scandir(path, files)
     return files
-
 
 # generate an Extension object from its dotted name
 def makeExtension(extName):
@@ -34,12 +35,9 @@ extNames = scandir("gmatch4py")
 extensions = cythonize([makeExtension(name) for name in extNames])
 
 setup(
-    name="Gmatch4py",
+    name="GMatch4py",
     description="A module for graph matching",
-    packages=["gmatch4py"],
-    #ext_modules=cythonize([
-     #   Extension("*", ["gmatch4py/*.pyx"],include_dirs=[np.get_include()])
-    #]),
+    packages=["gmatch4py","gmatch4py.ged","gmatch4py.kernels"],
     ext_modules=extensions,
     cmdclass={'build_ext': build_ext},
     setup_requires=["numpy","networkx"],
@@ -47,7 +45,7 @@ setup(
     version="0.1"
 )
 #Clean cpp and compiled file
-f=False
+f=True
 if f:
     if os.path.exists("build"):
         shutil.rmtree("build")

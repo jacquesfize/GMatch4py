@@ -17,12 +17,18 @@ import copy
 import networkx as nx
 import numpy as np
 cimport numpy as np
+from ..base cimport Base
+
+cdef class WeisfeleirLehmanKernel(Base):
+
+    cdef int h
+
+    def __init__(self,h=2):
+        Base.__init__(self,0,True)
+        self.h=h
 
 
-class WeisfeleirLehmanKernel(object):
-    __type__ = "sim"
-    @staticmethod
-    def compare(graph_list,selected,h=2):
+    cpdef np.ndarray compare(self,list graph_list, list selected):
         """Compute the all-pairs kernel values for a list of graphs.
         This function can be used to directly compute the kernel
         matrix for a list of graphs. The direct computation of the
@@ -103,7 +109,7 @@ class WeisfeleirLehmanKernel(object):
 
         new_labels = copy.deepcopy(labels) # Can't work without it !!!
 
-        while it < h:
+        while it < self.h:
             # create an empty lookup table
             label_lookup = {}
             label_counter = 0

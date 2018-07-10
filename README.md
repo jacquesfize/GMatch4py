@@ -11,17 +11,14 @@ Gmatch4py is a library dedicated to graph matching. Graph structure are stored i
  
 ## Installation
 
-First, compile the library by running this command:
+To install `GMatch4py`, run the following commands:
 
 ```
-$ python3 setup.py build_ext
+$ git clone https://github.com/Jacobe2169/GMatch4py.git
+$ cd GMatch4py
+$ python3 setup.py install
 ```
 
-Then, install the compiled module with:
-
-```
-$ pip3 install .
-```
 
 ## Get Started
 
@@ -75,8 +72,8 @@ each code is associated with a reference to the original.**
 
   * Debug algorithms with --> (*debug needed*)
   * Improve code structure and performance
-  * Simplify `setup.py`
+  * Simplify `setup.py` :heavy_check_mark:
   * Some algorithms are distance and others are similarity measure. Must change the compare
   methods so it can adapt to the user need. For example, maybe the user want to deal with 
-  graph similarity rather than distance between graph.
-  * Write the documentation
+  graph similarity rather than distance between graph.:heavy_check_mark:
+  * Write the documentation :see_no_evil:
