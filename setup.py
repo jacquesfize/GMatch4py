@@ -37,7 +37,7 @@ extensions = cythonize([makeExtension(name) for name in extNames])
 setup(
     name="GMatch4py",
     description="A module for graph matching",
-    packages=["gmatch4py","gmatch4py.ged","gmatch4py.kernels"],
+    packages=["gmatch4py"],
     ext_modules=extensions,
     cmdclass={'build_ext': build_ext},
     setup_requires=["numpy","networkx"],
