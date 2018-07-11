@@ -43,9 +43,11 @@ def nx2nk(nxG, weightAttr=None):
 
 def getClique(nx_graph):
     final_cliques=[]
-    if len(nx_graph) ==0:
+    if len(nx_graph) ==0 or not nx_graph:
         return final_cliques
     netkit_graph,idmap=nx2nk(nx_graph)
+    if not netkit_graph:
+        return  final_cliques
     idmap={v:k for k,v in idmap.items()}
     cliques=MaximalCliques(netkit_graph).run().getCliques()
     for cl in cliques:
@@ -63,8 +65,9 @@ class BagOfCliques():
         cdef double[:,:] scores = np.zeros((n,n))
         cdef int i
         for i in range(len(scores)):
-            if not i in selected:
-                continue
+            if selected:
+                if not i in selected:
+                    continue
             for j in range(i,len(scores)):
                 scores[i,j]=(np.dot(bog[i],bog[j]))/(np.sqrt(np.sum(bog[i]**2))*np.sqrt(np.sum(bog[j]**2))) # Can be computed in one line
                 scores[j,i]=scores[i,j]
@@ -164,3 +167,8 @@ class BagOfCliques():
                     vector[map_str_cliques[hash]] = 1
             boc[g] = vector
         return boc
+
+    def distance(self,matrix):
+        return 1-np.array(matrix)
+    def similarity(self,matrix):
+        return np.array(matrix)

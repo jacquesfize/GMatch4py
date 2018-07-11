@@ -10,6 +10,10 @@ except:
     print("copy from www.cython.org and install it")
     sys.exit(1)
 
+is_linux = sys.platform.system() == 'Linux'
+libs=[]
+if is_linux:  # Issue #42
+    libs.append('rt')  # -lrt for clock_gettime
 
 def scandir(dir, files=[]):
     for file in os.listdir(dir):
@@ -22,17 +26,23 @@ def scandir(dir, files=[]):
 
 # generate an Extension object from its dotted name
 def makeExtension(extName):
+    global libs
     extPath = extName.replace(".", os.path.sep)+".pyx"
     return Extension(
         extName,
-        [extPath],include_dirs=[np.get_include()],language='c++'
+        [extPath],include_dirs=[np.get_include()],language='c++',libraries=libs
         )
 
 # get the list of extensions
 extNames = scandir("gmatch4py")
 
 # and build up the set of Extension objects
+
+
 extensions = cythonize([makeExtension(name) for name in extNames])
+
+
+
 
 setup(
     name="GMatch4py",
@@ -45,7 +55,7 @@ setup(
     version="0.1"
 )
 #Clean cpp and compiled file
-f=True
+f=False
 if f:
     if os.path.exists("build"):
         shutil.rmtree("build")
