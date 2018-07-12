@@ -10,7 +10,7 @@ except:
     print("copy from www.cython.org and install it")
     sys.exit(1)
 
-is_linux = sys.platform.system() == 'Linux'
+is_linux = sys.platform == 'linux'
 libs=[]
 if is_linux:  # Issue #42
     libs.append('rt')  # -lrt for clock_gettime
