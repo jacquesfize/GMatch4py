@@ -47,15 +47,15 @@ extensions = cythonize([makeExtension(name) for name in extNames])
 setup(
     name="GMatch4py",
     description="A module for graph matching",
-    packages=["gmatch4py"],
+    packages=["gmatch4py","gmatch4py.helpers"],
     ext_modules=extensions,
     cmdclass={'build_ext': build_ext},
-    setup_requires=["numpy","networkx"],
-    install_requires=["numpy","networkx"],
+    setup_requires=["numpy","networkx","networkit"],
+    install_requires=["numpy","networkx","networkit"],
     version="0.1"
 )
 #Clean cpp and compiled file
-f=False
+f=True
 if f:
     if os.path.exists("build"):
         shutil.rmtree("build")
