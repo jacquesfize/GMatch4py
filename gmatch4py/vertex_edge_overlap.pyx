@@ -24,7 +24,7 @@ cdef class VertexEdgeOverlap(Base):
         for i in range(n):
             for j in range(i,n):
                 g1,g2 = listgs[i],listgs[j]
-                f=self.isAccepted(g1,i,selected) & self.isAccepted(g2,j,selected)
+                f=self.isAccepted(g1,i,selected)
                 if f:
                     inter_g= intersection(g1,g2)
                     denom=g1.number_of_nodes()+g2.number_of_nodes()+\

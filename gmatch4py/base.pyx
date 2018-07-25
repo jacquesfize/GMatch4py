@@ -135,7 +135,7 @@ cdef class Base:
         if not G:
             f=False
         elif len(G)== 0:
-            f=False
+           f=False
         if selected:
             if not index in selected:
                 f=False

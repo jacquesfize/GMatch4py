@@ -63,7 +63,7 @@ cdef class WeisfeleirLehmanKernel(Base):
             # Computing the maximum number of nodes in the graphs. It
             # will be used in the computation of vectorial
             # representation.
-            if (n_max < graph_list[i].number_of_nodes()):
+            if n_max < graph_list[i].number_of_nodes():
                 n_max = graph_list[i].number_of_nodes()
 
         phi = np.zeros((n_nodes, n), dtype=np.uint64)

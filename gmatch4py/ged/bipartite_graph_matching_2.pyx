@@ -28,7 +28,7 @@ cdef class BP_2(Base):
         for i in range(n):
             for j in range(i, n):
                 g1,g2=listgs[i],listgs[j]
-                f=self.isAccepted(g1,i,selected) & self.isAccepted(g2,j,selected)
+                f=self.isAccepted(g1,i,selected)
                 if f:
                     comparison_matrix[i, j] = self.bp2(g1, g2)
                 else:
