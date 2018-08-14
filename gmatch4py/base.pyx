@@ -102,6 +102,8 @@ cdef class Base:
         :return: np.ndarray
         """
         if self.type_alg == 1:
+            if not self.normalized:
+                matrix=minmax_scale(matrix)
             return matrix
         else:
             if not self.normalized:
