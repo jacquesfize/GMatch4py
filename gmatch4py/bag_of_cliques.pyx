@@ -8,61 +8,21 @@ import numpy as np
 cimport numpy as np
 import sys
 
-from networkit import graph
-from networkit.clique import MaximalCliques
+from .base cimport Base,intersection
 
-def nx2nk(nxG, weightAttr=None):
-    """
-    Convert a networkx.Graph to a NetworKit.Graph
-        :param weightAttr: the edge attribute which should be treated as the edge weight.
-    """
 
-    # map networkx node ids to consecutive numerical node ids
-    idmap = dict((id, u) for (id, u) in zip(list(nxG.nodes), range(nxG.number_of_nodes())))
-    z = max(idmap.values()) + 1
-    # print("z = {0}".format(z))
+cdef class BagOfCliques(Base):
 
-    if weightAttr is not None:
-        nkG = graph.Graph(z, weighted=True, directed=nxG.is_directed())
-        for (u_, v_) in nxG.edges():
-            u, v = idmap[u_], idmap[v_]
-            w = nxG[u_][v_][weightAttr]
-            nkG.addEdge(u, v, w)
-    else:
-        nkG = graph.Graph(z, directed=nxG.is_directed())
-        for (u_, v_) in nxG.edges():
-            u, v = idmap[u_], idmap[v_]
-            # print(u_, v_, u, v)
-            assert (u < z)
-            assert (v < z)
-            nkG.addEdge(u, v)
+    def __init__(self):
+            Base.__init__(self,0,True)
 
-    assert (nkG.numberOfNodes() == nxG.number_of_nodes())
-    assert (nkG.numberOfEdges() == nxG.number_of_edges())
-    return nkG.removeSelfLoops(),idmap
 
-def getClique(nx_graph):
-    final_cliques=[]
-    if len(nx_graph) ==0 or not nx_graph:
-        return final_cliques
-    netkit_graph,idmap=nx2nk(nx_graph)
-    if not netkit_graph:
-        return  final_cliques
-    idmap={v:k for k,v in idmap.items()}
-    cliques=MaximalCliques(netkit_graph).run().getCliques()
-    for cl in cliques:
-        final_cliques.append(list(map(lambda x:idmap[x],cl)))
-    return final_cliques
-
-class BagOfCliques():
-
-    @staticmethod
-    def compare(graphs,selected):
+    cpdef np.ndarray compare(self,list listgs, list selected):
         b=BagOfCliques()
-        bog=b.getBagOfCliques(graphs).astype(np.float32)
+        bog=b.getBagOfCliques(listgs).astype(np.float32)
         #Compute cosine similarity
         cdef int n=bog.shape[0]
-        cdef double[:,:] scores = np.zeros((n,n))
+        cdef np.ndarray scores = np.zeros((n,n))
         cdef int i
         for i in range(len(scores)):
             if selected:
@@ -89,13 +49,11 @@ class BagOfCliques():
             km+=1
             if not g:
                 continue
-            sys.stdout.write("\r{0}/{1} -- {2}".format(km,len_graphs,len(g)))
-            try:
-                cliques = list(getClique(nx.Graph(g)))
-            except:
+            # sys.stdout.write("\r{0}/{1} -- {2}".format(km,len_graphs,len(g)))
+            cliques = list(nx.enumerate_all_cliques(nx.Graph(g)))
                 #no clique found
                 #print(nx.Graph(g).edges())
-                cliques =[]
+            #cliques =[]
             for clique in cliques:
 
                 cli_temp = copy.deepcopy(clique)
@@ -160,15 +118,10 @@ class BagOfCliques():
             sys.stdout.write("\r{0}/{1}".format(g,len(graphs)))
             gr = graphs[g]
             vector = np.zeros(l_v)
-            cliques = list(getClique(nx.Graph(gr)))
+            cliques = list(nx.enumerate_all_cliques(nx.Graph(gr)))
             for clique in cliques:
                 hash=self.clique2str(clique)
                 if hash in map_str_cliques:
                     vector[map_str_cliques[hash]] = 1
             boc[g] = vector
         return boc
-
-    def distance(self,matrix):
-        return 1-np.array(matrix)
-    def similarity(self,matrix):
-        return np.array(matrix)
