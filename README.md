@@ -21,13 +21,51 @@ $ python3 setup.py install
 
 
 ## Get Started
+### Graph input format
 
-For now, every algorithms class is composed with a static method called `compare()`. `compare()` takes
-two arguments :
+In `Gmatch4py`, algorithms manipulate `networkx.Graph`, a complete graph model that 
+comes with a large spectrum of parser to load your graph from various inputs : `*.graphml,*.gexf,..` (check [here](https://networkx.github.io/documentation/stable/reference/readwrite/index.html) to see all the format accepted)
 
- * An array containing the graphs to compare
- * An array containing indexes of graph you want to compare. Set to `None`, if you want to
- measure the similarity/distance between every graphs. 
+### Use Gmatch4py
+If you want to use algorithms like *graph edit distances*, here is an example:
+
+```{python}
+# Gmatch4py use networkx graph 
+import networkx as nx 
+# import the GED using the munkres algorithm
+from gmatch4py.ged.graph_edit_dist import GraphEditDistance
+```
+
+In this example, we use generated graphs using `networkx` helpers:
+```{python}
+g1=nx.complete_bipartite_graph(5,4) 
+g2=nx.complete_bipartite_graph(6,4)
+```
+
+All graph matching algorithms in `Gmatch4py work this way:
+ * Each algorithm is associated with an object, each object having its specific parameters. In this case, the parameters are the edit costs (delete a vertex, add a vertex, ...)
+ * Each object is associated with a `compare()` function with two parameters. First parameter is **a list of the graphs** you want to **compare**, i.e. measure the distance/similarity (depends on the algorithm). Then, you can specify a sample of graphs to be compared to all the other graphs. To this end, the second parameter should be **a list containing the indices** of these graphs (based on the first parameter list). If you rather compute the distance/similarity **between all graphs**, just use the `None` value.
+
+```{python}
+ged=GraphEditDistance(1,1,1,1) # all edit costs are equal to 1
+result=ged.compare([g1,g2],None) 
+print(result)
+```
+
+The output is a similarity/distance matrix :
+```
+Out[10]:
+array([[0., 7.],
+       [7., 0.]])
+```
+This output result is "raw", if you wish to have normalized results in terms of distance (or similarity) you can use :
+
+```
+ged.similarity(result)
+# or 
+ged.distance(result)
+```
+
 
 
 ## List of algorithms

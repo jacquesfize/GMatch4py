@@ -37,12 +37,7 @@ def makeExtension(extName):
 extNames = scandir("gmatch4py")
 
 # and build up the set of Extension objects
-
-
 extensions = cythonize([makeExtension(name) for name in extNames])
-
-
-
 
 setup(
     name="GMatch4py",
@@ -50,8 +45,8 @@ setup(
     packages=["gmatch4py","gmatch4py.helpers"],
     ext_modules=extensions,
     cmdclass={'build_ext': build_ext},
-    setup_requires=["numpy","networkx","networkit"],
-    install_requires=["numpy","networkx","networkit"],
+    setup_requires=["numpy","networkx","networkit","scipy"],
+    install_requires=["numpy","networkx","networkit","scipy"],
     version="0.1"
 )
 #Clean cpp and compiled file
