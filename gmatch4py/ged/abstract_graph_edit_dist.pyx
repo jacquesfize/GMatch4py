@@ -87,13 +87,13 @@ cdef class AbstractGraphEditDistance(Base):
         cdef np.ndarray comparison_matrix = np.zeros((n, n)).astype(float)
         cdef int i,j
         for i in range(n):
-            for j in range(i, n):
+            for j in range(n):
                 g1,g2=listgs[i],listgs[j]
                 f=self.isAccepted(g1,i,selected)
                 if f:
                     comparison_matrix[i, j] = self.distance_ged(g1, g2)
                 else:
                     comparison_matrix[i, j] = np.inf
-                comparison_matrix[j, i] = comparison_matrix[i, j]
+                #comparison_matrix[j, i] = comparison_matrix[i, j]
         np.fill_diagonal(comparison_matrix,0)
         return comparison_matrix
