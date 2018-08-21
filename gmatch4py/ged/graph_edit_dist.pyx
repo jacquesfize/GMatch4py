@@ -19,6 +19,8 @@ cdef class GraphEditDistance(AbstractGraphEditDistance):
 
     def relabel_cost(self, node1, node2, G, H):
         if node1 != node2:
+            if len(G.edges(node1)) == 0 and len(H.edges(node2)) ==0:
+                return self.node_del+self.node_ins
             R = nx.create_empty_copy(G)
             R.add_edges_from(G.edges(node1,data=True))
             nx.relabel_nodes(R,{node1:node2},copy=False)

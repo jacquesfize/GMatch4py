@@ -80,13 +80,16 @@ cdef class BagOfCliques(Base):
 
 
     def clique2str(self,cliques):
-        return "".join(sorted(cliques))
+        try:
+            return "".join(sorted(cliques))
+        except:
+            return "".join(sorted(list(map(str,cliques))))
 
     def transform_clique_vocab(self,clique_vocab):
         cdef dict new_vocab={}
         cdef int len_voc=len(clique_vocab)
         for c in range(len_voc):
-            print(c)
+            #print(c)
             new_vocab[self.clique2str(clique_vocab[c])]=c
         return new_vocab
 
@@ -115,7 +118,7 @@ cdef class BagOfCliques(Base):
         cdef np.ndarray vector
         cdef list cliques
         for g in range(len(graphs)):
-            sys.stdout.write("\r{0}/{1}".format(g,len(graphs)))
+            #sys.stdout.write("\r{0}/{1}".format(g,len(graphs)))
             gr = graphs[g]
             vector = np.zeros(l_v)
             cliques = list(nx.enumerate_all_cliques(nx.Graph(gr)))
