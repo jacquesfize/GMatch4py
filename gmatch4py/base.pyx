@@ -76,7 +76,7 @@ cpdef intersection(G, H):
 cpdef union_(G, H):
     R = nx.create_empty_copy(G)
     R.add_edges_from(G.edges(data=True))
-    R.add_edges_from(G.edges(data=True))
+    R.add_edges_from(H.edges(data=True))
     return R
 
 cdef class Base:
