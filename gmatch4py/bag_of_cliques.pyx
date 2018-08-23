@@ -54,7 +54,7 @@ cdef class BagOfCliques(Base):
             if not g:
                 continue
             # sys.stdout.write("\r{0}/{1} -- {2}".format(km,len_graphs,len(g)))
-            cliques = list(nx.enumerate_all_cliques(nx.Graph(g)))
+            cliques = list(nx.find_cliques(nx.Graph(g)))
                 #no clique found
                 #print(nx.Graph(g).edges())
             #cliques =[]
