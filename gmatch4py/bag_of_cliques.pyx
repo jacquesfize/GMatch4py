@@ -30,9 +30,9 @@ cdef class BagOfCliques(Base):
             if selected:
                 if not i in selected:
                     continue
-            bog_i=np.asarray(bog[i].todense())
+            bog_i=bog[i]
             for j in range(i,len(scores)):
-                bog_j=np.asarray(bog[j].todense())
+                bog_j=bog[j]
                 scores[i,j]=(np.dot(bog_i,bog_j.T))/(np.sqrt(np.sum(bog_i**2))*np.sqrt(np.sum(bog_j**2))) # Can be computed in one line
                 scores[j,i]=scores[i,j]
         return scores
