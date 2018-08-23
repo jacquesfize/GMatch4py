@@ -6,6 +6,7 @@ from typing import Sequence
 import networkx as nx
 import numpy as np
 cimport numpy as np
+from scipy.sparse import csr_matrix,lil_matrix
 import sys
 
 from .base cimport Base,intersection
@@ -20,6 +21,7 @@ cdef class BagOfCliques(Base):
     cpdef np.ndarray compare(self,list listgs, list selected):
         b=BagOfCliques()
         bog=b.getBagOfCliques(listgs).astype(np.float32)
+        print(bog.shape)
         #Compute cosine similarity
         cdef int n=bog.shape[0]
         cdef np.ndarray scores = np.zeros((n,n))
@@ -28,8 +30,10 @@ cdef class BagOfCliques(Base):
             if selected:
                 if not i in selected:
                     continue
+            bog_i=np.asarray(bog[i].todense())
             for j in range(i,len(scores)):
-                scores[i,j]=(np.dot(bog[i],bog[j]))/(np.sqrt(np.sum(bog[i]**2))*np.sqrt(np.sum(bog[j]**2))) # Can be computed in one line
+                bog_j=np.asarray(bog[j].todense())
+                scores[i,j]=(np.dot(bog_i,bog_j.T))/(np.sqrt(np.sum(bog_i**2))*np.sqrt(np.sum(bog_j**2))) # Can be computed in one line
                 scores[j,i]=scores[i,j]
         return scores
 
@@ -114,9 +118,11 @@ cdef class BagOfCliques(Base):
         cdef list clique_vocab=self.getUniqueCliques(graphs)
         cdef dict map_str_cliques=self.transform_clique_vocab(clique_vocab)
         cdef int l_v=len(clique_vocab)
-        cdef np.ndarray boc = np.zeros((len(graphs), l_v))
+        boc = lil_matrix((len(graphs), l_v))
         cdef np.ndarray vector
         cdef list cliques
+        cdef str hash
+        #print(1)
         for g in range(len(graphs)):
             #sys.stdout.write("\r{0}/{1}".format(g,len(graphs)))
             gr = graphs[g]

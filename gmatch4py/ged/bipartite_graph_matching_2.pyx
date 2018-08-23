@@ -4,9 +4,7 @@ cimport numpy as np
 from ..base cimport Base
 
 cdef class BP_2(Base):
-    """
 
-    """
 
     cdef int node_del
     cdef int node_ins
@@ -14,7 +12,20 @@ cdef class BP_2(Base):
     cdef int edge_ins
 
     def __init__(self, int node_del=1, int node_ins=1, int edge_del=1, int edge_ins=1):
-        """Constructor for HED"""
+        """
+        BP_2 Constructor
+
+        Parameters
+        ----------
+        node_del :int
+            Node deletion cost
+        node_ins : int
+            Node insertion cost
+        edge_del : int
+            Edge Deletion cost
+        edge_ins : int
+            Edge Insertion cost
+        """
         Base.__init__(self,1,False)
         self.node_del = node_del
         self.node_ins = node_ins
@@ -38,26 +49,56 @@ cdef class BP_2(Base):
         return comparison_matrix
 
 
-    def __init__(self, node_del=1, node_ins=1, edge_del=1, edge_ins=1):
-        """Constructor for HED"""
-        self.node_del = node_del
-        self.node_ins = node_ins
-        self.edge_del = edge_del
-        self.edge_ins = edge_ins
-
     cdef double bp2(self, g1, g2):
         """
-        Compute de Hausdorff Edit Distance
-        :param g1: first graph
-        :param g2: second graph
-        :return:
+        Compute the BP2 similarity value between two `networkx.Graph`
+        
+        Parameters
+        ----------
+        g1 : networkx.Graph
+            First Graph
+        g2 : networkx.Graph
+            Second Graph
+
+        Returns
+        -------
+        float 
+            similarity value
         """
         return np.min([self.distance_bp2(self.psi(g1,g2)),self.distance_bp2(self.psi(g2,g1))])
 
     cdef double distance_bp2(self,e):
+        """
+        Return the distance based on the edit path found.
+        Parameters
+        ----------
+        e : list
+            Contains the edit path costs
+
+        Returns
+        -------
+        double
+            Return sum of the costs from the edit path
+        """
         return np.sum(e)
 
     cdef list psi(self,g1,g2):
+        """
+        Return the optimal edit path :math:`\psi` based on BP2 algorithm.
+        
+        
+        Parameters
+        ----------
+        g1 : networkx.Graph
+            First Graph
+        g2 : networkx.Graph
+            Second Graph
+
+        Returns
+        -------
+        list
+            list containing costs from the optimal edit path
+        """
         cdef list psi_=[]
         cdef list nodes1 = list(g1.nodes)
         cdef list nodes2 = list(g2.nodes)

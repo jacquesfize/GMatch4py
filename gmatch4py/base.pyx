@@ -74,18 +74,60 @@ cpdef intersection(G, H):
     return R
 
 cpdef union_(G, H):
+    """
+    Return a graph that contains nodes and edges from both graph G and H.
+    
+    Parameters
+    ----------
+    G : networkx.Graph
+        First graph
+    H : networkx.Graph 
+        Second graph
+
+    Returns
+    -------
+    networkx.Graph
+        A new graph with the same type as G.
+    """
     R = nx.create_empty_copy(G)
+    R.add_nodes_from(H.nodes(data=True))
     R.add_edges_from(G.edges(data=True))
     R.add_edges_from(H.edges(data=True))
     return R
 
 cdef class Base:
+    """
+    This class define the common methods to all Graph Matching algorithm.
 
+    Attributes
+    ----------
+    type_alg : int
+        Indicate the type of measure returned by the algorithm :
+
+         * 0 : similarity
+         * 1 : distance
+    normalized : bool
+        Indicate if the algorithm return normalized results (between 0 and 1)
+
+    """
     def __cinit__(self):
         self.type_alg=0
         self.normalized=False
 
     def __init__(self,type_alg,normalized):
+        """
+        Constructor of Base
+
+        Parameters
+        ----------
+        type_alg : int
+            Indicate the type of measure returned by the algorithm :
+
+             * **0** : similarity
+             * **1** : distance
+        normalized : bool
+            Indicate if the algorithm return normalized results (between 0 and 1)
+        """
         if type_alg <0:
             self.type_alg=0
         elif type_alg >1 :
@@ -94,12 +136,40 @@ cdef class Base:
             self.type_alg=type_alg
         self.normalized=normalized
     cpdef np.ndarray compare(self,list graph_list, list selected):
+        """
+        Return the similarity/distance matrix using the current algorithm.
+        
+        >>>Base.compare([nx.Graph(),nx.Graph()],None)
+        >>>Base.compare([nx.Graph(),nx.Graph()],[0,1])
+        
+        Parameters
+        ----------
+        graph_list : networkx.Graph array
+            Contains the graphs to compare
+        selected : int array
+            Sometimes, you only wants to compute similarity of some graphs to every graphs. If so, indicate their indices in
+            `graph_list`, else, put the None value. 
+            the None value
+        Returns
+        -------
+        np.array
+            distance/similarity matrix
+            
+        """
         pass
 
     cpdef np.ndarray distance(self, np.ndarray matrix):
         """
-        Return the distance matrix between the graphs
-        :return: np.ndarray
+        Return a normalized distance matrix
+        Parameters
+        ----------
+        matrix : np.array
+            Similarity/distance matrix you want to transform
+
+        Returns
+        -------
+        np.array
+            distance matrix
         """
         if self.type_alg == 1:
             if not self.normalized:
@@ -111,8 +181,16 @@ cdef class Base:
             return 1-matrix
     cpdef np.ndarray similarity(self, np.ndarray matrix):
         """
-        Return a the similarity value between the graphs 
-        :return: 
+        Return a normalized similarity matrix
+        Parameters
+        ----------
+        matrix : np.array
+            Similarity/distance matrix you want to transform
+
+        Returns
+        -------
+        np.array
+            similarity matrix
         """
         if self.type_alg == 0:
             return matrix
@@ -121,18 +199,42 @@ cdef class Base:
                 matrix=minmax_scale(matrix)
             return 1-matrix
 
-    def mcs(self,g1,g2):
+    def mcs(self, G, H):
         """
-        Return the Most Common Subgraph
-        :param g1: graph1
-        :param g2: graph2
-        :return: np.ndarray
+        Return the Most Common Subgraph of
+        Parameters
+        ----------
+        G : networkx.Graph
+            First Graph
+        H : networkx.Graph
+            Second Graph
+
+        Returns
+        -------
+        networkx.Graph
+            Most common Subgrah
         """
-        R=g1.copy()
-        R.remove_nodes_from(n for n in g1 if n not in g2)
-        return R
 
     cpdef bint isAccepted(self,G,index,selected):
+        """
+        Indicate if the graph will be compared to the other. A graph is "accepted" if :
+         * G exists(!= None) and not empty (|vertices(G)| >0)
+         * If selected graph to compare were indicated, check if G exists in selected
+        
+        Parameters
+        ----------
+        G : networkx.Graph
+            Graph
+        index : int
+            index in the graph list parameter in `Base.compare()`
+        selected : int array
+            `selected` parameter value in `Base.compare()`
+
+        Returns
+        -------
+        bool :
+            if is accepted
+        """
         f=True
         if not G:
             f=False
