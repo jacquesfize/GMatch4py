@@ -118,7 +118,7 @@ cdef class BagOfCliques(Base):
         cdef list clique_vocab=self.getUniqueCliques(graphs)
         cdef dict map_str_cliques=self.transform_clique_vocab(clique_vocab)
         cdef int l_v=len(clique_vocab)
-        boc = lil_matrix((len(graphs), l_v))
+        boc = np.zeros((len(graphs), l_v))
         cdef np.ndarray vector
         cdef list cliques
         cdef str hash
@@ -127,7 +127,7 @@ cdef class BagOfCliques(Base):
             #sys.stdout.write("\r{0}/{1}".format(g,len(graphs)))
             gr = graphs[g]
             vector = np.zeros(l_v)
-            cliques = list(nx.enumerate_all_cliques(nx.Graph(gr)))
+            cliques = list(nx.find_cliques(nx.Graph(gr)))
             for clique in cliques:
                 hash=self.clique2str(clique)
                 if hash in map_str_cliques:
