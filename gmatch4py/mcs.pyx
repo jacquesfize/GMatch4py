@@ -26,7 +26,20 @@ cdef class MCS(Base):
                 comparison_matrix[j, i] = comparison_matrix[i, j]
         return comparison_matrix
 
-    def s_mcs(self,g1, g2):
+    def s_mcs(self,G, H):
+        """
+        Return the MCS measure value between
+        Parameters
+        ----------
+        G : networkx.Graph
+            First Graph
+        H : networkx.Graph
+            Second Graph
 
-        return len(self.mcs(g1, g2)) / float(max(len(g1), len(g2)))
+        Returns
+        -------
+
+        """
+
+        return len(self.mcs(G, H)) / float(max(len(G), len(H)))
 

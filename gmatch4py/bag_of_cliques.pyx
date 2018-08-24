@@ -13,16 +13,24 @@ from .base cimport Base,intersection
 
 
 cdef class BagOfCliques(Base):
+    """
+    The Bag of Cliques is representation of a graph corpus using the well-known *bag of words* model. Here, instead of
+    word, we use unique cliques found in the graphs as a vocabulary. A clique is a highly connected graph where all the vertices are connected by an edge.
+
+    The resulting representation is then use to compute similarity value between graphs. For this purpose, we use the cosine
+    similarity.
+    """
 
     def __init__(self):
-            Base.__init__(self,0,True)
+        """
+        Constructor of Bag Of Cliques.
+        """
+        Base.__init__(self,0,True)
 
 
     cpdef np.ndarray compare(self,list listgs, list selected):
         b=BagOfCliques()
-        bog=b.getBagOfCliques(listgs).astype(np.float32)
-        print(bog.shape)
-        #Compute cosine similarity
+        bog=b.get_bag_of_cliques(listgs).astype(np.float32)
         cdef int n=bog.shape[0]
         cdef np.ndarray scores = np.zeros((n,n))
         cdef int i
@@ -37,10 +45,18 @@ cdef class BagOfCliques(Base):
                 scores[j,i]=scores[i,j]
         return scores
 
-    def getUniqueCliques(self,graphs):
+    def get_unique_cliques(self, graphs):
         """
-        Return unique cliques from a population of graphs
-        :return:
+        Return a cliques found in a set of graphs
+        Parameters
+        ----------
+        graphs: networkx.Graph array
+            list of graphs
+
+        Returns
+        -------
+        list
+            Cliques set
         """
         t = {}
         c_ = 0
@@ -53,13 +69,8 @@ cdef class BagOfCliques(Base):
             km+=1
             if not g:
                 continue
-            # sys.stdout.write("\r{0}/{1} -- {2}".format(km,len_graphs,len(g)))
             cliques = list(nx.find_cliques(nx.Graph(g)))
-                #no clique found
-                #print(nx.Graph(g).edges())
-            #cliques =[]
             for clique in cliques:
-
                 cli_temp = copy.deepcopy(clique)
                 new_clique = False
                 for i in range(len(clique)):
@@ -84,12 +95,36 @@ cdef class BagOfCliques(Base):
 
 
     def clique2str(self,cliques):
+        """
+        Return a "hash" string of a clique
+
+        Parameters
+        ----------
+        cliques: array
+
+        Returns
+        -------
+        str
+            hash of a clique
+        """
         try:
             return "".join(sorted(cliques))
         except:
             return "".join(sorted(list(map(str,cliques))))
 
     def transform_clique_vocab(self,clique_vocab):
+        """
+        Transform cliques found in `get_unique_cliques()` in a proper format to build the "Bag of Cliques"
+
+        Parameters
+        ----------
+        clique_vocab : array
+            contains cliques
+        Returns
+        -------
+        dict
+            new clique vocab format
+        """
         cdef dict new_vocab={}
         cdef int len_voc=len(clique_vocab)
         for c in range(len_voc):
@@ -97,32 +132,28 @@ cdef class BagOfCliques(Base):
             new_vocab[self.clique2str(clique_vocab[c])]=c
         return new_vocab
 
-
-    def ifHaveMinor(self,clique, dict mapping):
+    def get_bag_of_cliques(self, graphs):
         """
-        If a clique (minor) H belong to a graph G
-        :param H:
-        :return:
-        """
-        if self.clique2str(clique) in mapping:
-            return 1
-        return 0
+        Return a the Bag of Cliques representation from a graph set.
 
+        Parameters
+        ----------
+        graphs : networkx.Graph array
+            list of graphs
 
-    def getBagOfCliques(self,graphs ):
+        Returns
+        -------
+        np.ndarray
+            bag of cliques
         """
-
-        :param clique_vocab:
-        :return:
-        """
-        cdef list clique_vocab=self.getUniqueCliques(graphs)
+        cdef list clique_vocab=self.get_unique_cliques(graphs)
         cdef dict map_str_cliques=self.transform_clique_vocab(clique_vocab)
         cdef int l_v=len(clique_vocab)
         boc = np.zeros((len(graphs), l_v))
         cdef np.ndarray vector
         cdef list cliques
         cdef str hash
-        #print(1)
+
         for g in range(len(graphs)):
             #sys.stdout.write("\r{0}/{1}".format(g,len(graphs)))
             gr = graphs[g]

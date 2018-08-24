@@ -45,8 +45,8 @@ setup(
     packages=["gmatch4py","gmatch4py.helpers"],
     ext_modules=extensions,
     cmdclass={'build_ext': build_ext},
-    setup_requires=["numpy","networkx","networkit","scipy"],
-    install_requires=["numpy","networkx","networkit","scipy"],
+    setup_requires=["numpy","networkx","scipy"],
+    install_requires=["numpy","networkx","scipy"],
     version="0.1"
 )
 #Clean cpp and compiled file

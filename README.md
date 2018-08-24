@@ -5,9 +5,10 @@ GMatch4py algorithms were implemented with Cython to enhance performance.
 
 ## Requirements
  
- * Python3
+ * Python 3.x
  * Cython
- * networkit (for Bag of Cliques)
+ * networkx
+ * numpy
  
 ## Installation
 
@@ -19,6 +20,11 @@ $ cd GMatch4py
 $ python3 setup.py install
 ```
 
+or 
+
+```
+$ (sudo) pip3 install .
+```
 
 ## Get Started
 ### Graph input format
@@ -33,7 +39,7 @@ If you want to use algorithms like *graph edit distances*, here is an example:
 # Gmatch4py use networkx graph 
 import networkx as nx 
 # import the GED using the munkres algorithm
-from gmatch4py.ged.graph_edit_dist import GraphEditDistance
+import gmatch4py as gm
 ```
 
 In this example, we use generated graphs using `networkx` helpers:
@@ -47,7 +53,7 @@ All graph matching algorithms in `Gmatch4py work this way:
  * Each object is associated with a `compare()` function with two parameters. First parameter is **a list of the graphs** you want to **compare**, i.e. measure the distance/similarity (depends on the algorithm). Then, you can specify a sample of graphs to be compared to all the other graphs. To this end, the second parameter should be **a list containing the indices** of these graphs (based on the first parameter list). If you rather compute the distance/similarity **between all graphs**, just use the `None` value.
 
 ```{python}
-ged=GraphEditDistance(1,1,1,1) # all edit costs are equal to 1
+ged=gm.GraphEditDistance(1,1,1,1) # all edit costs are equal to 1
 result=ged.compare([g1,g2],None) 
 print(result)
 ```
@@ -108,10 +114,10 @@ each code is associated with a reference to the original.**
 
 ## TODO List
 
-  * Debug algorithms with --> (*debug needed*)
-  * Improve code structure and performance
+  * Debug algorithms --> :runner:
+  * Improve code structure and performance :runner:
   * Simplify `setup.py` :heavy_check_mark:
   * Some algorithms are distance and others are similarity measure. Must change the compare
   methods so it can adapt to the user need. For example, maybe the user want to deal with 
-  graph similarity rather than distance between graph.:heavy_check_mark:
-  * Write the documentation :see_no_evil:
+  graph similarity rather than distance between graph. :heavy_check_mark:
+  * Write the documentation :runner:
