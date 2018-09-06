@@ -1,3 +1,4 @@
+import setuptools
 import sys, os, shutil
 from distutils.core import setup
 from distutils.extension import Extension
@@ -39,15 +40,29 @@ extNames = scandir("gmatch4py")
 # and build up the set of Extension objects
 extensions = cythonize([makeExtension(name) for name in extNames])
 
+from os import path
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
 setup(
     name="GMatch4py",
-    description="A module for graph matching",
+    author="Jacques Fize",
+    description="A python module for graph matching (use Cython)",
+    long_description=long_description,
+    long_description_content_type='text/markdown',
+    url="https://github.com/Jacobe2169/GMatch4py",
     packages=["gmatch4py","gmatch4py.helpers"],
     ext_modules=extensions,
     cmdclass={'build_ext': build_ext},
     setup_requires=["numpy","networkx","scipy"],
     install_requires=["numpy","networkx","scipy"],
-    version="0.1"
+    version="0.2.2",
+    classifiers=[
+            "Programming Language :: Python :: 3",
+            "License :: OSI Approved :: MIT License",
+            "Operating System :: OS Independent",
+        ]
 )
 #Clean cpp and compiled file
 f=True
