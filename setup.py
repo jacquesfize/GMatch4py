@@ -1,4 +1,4 @@
-import setuptools
+#import setuptools
 import sys, os, shutil
 from distutils.core import setup
 from distutils.extension import Extension

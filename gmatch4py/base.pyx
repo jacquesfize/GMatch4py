@@ -4,16 +4,17 @@ import numpy as np
 cimport numpy as np
 import networkx as nx
 
-cdef np.ndarray minmax_scale(np.ndarray matrix):
+cpdef np.ndarray minmax_scale(np.ndarray matrix):
     """
     Optimize so it can works with Cython
     :param matrix: 
     :return: 
     """
     cdef double min_,max_
-    min_=np.min(matrix)
-    max_=np.max(matrix)
-    return matrix/(max_-min_)
+    cdef np.ndarray x
+    x=np.ma.masked_invalid(matrix)
+    max_=np.max(x)
+    return x/(max_)
 
 
 
@@ -179,6 +180,7 @@ cdef class Base:
             if not self.normalized:
                 matrix=minmax_scale(matrix)
             return 1-matrix
+
     cpdef np.ndarray similarity(self, np.ndarray matrix):
         """
         Return a normalized similarity matrix
