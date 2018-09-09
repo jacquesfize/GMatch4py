@@ -174,11 +174,11 @@ cdef class Base:
         """
         if self.type_alg == 1:
             if not self.normalized:
-                matrix=minmax_scale(matrix)
+                matrix=np.ma.getdata(minmax_scale(matrix))
             return matrix
         else:
             if not self.normalized:
-                matrix=minmax_scale(matrix)
+                matrix=np.ma.getdata(minmax_scale(matrix))
             return 1-matrix
 
     cpdef np.ndarray similarity(self, np.ndarray matrix):
@@ -198,7 +198,7 @@ cdef class Base:
             return matrix
         else:
             if not self.normalized:
-                matrix=minmax_scale(matrix)
+                matrix=np.ma.getdata(minmax_scale(matrix))
             return 1-matrix
 
     def mcs(self, G, H):
