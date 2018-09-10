@@ -21,8 +21,13 @@ cdef class GraphEditDistance(AbstractGraphEditDistance):
         R=nx.create_empty_copy(G)
         try:
             R.add_edges_from(G.edges(node1,node2))
-        except:
-            pass
+        except Exception as e:
+            # To counter bug with a None for attribute... weird ??
+            arr_=G.edges(node1,node2)
+            new_list=[]
+            for item in arr_:
+                new_list.append((item[0],item[1]))
+            R.add_edges_from(new_list)
         return R
 
     def relabel_cost(self, node1, node2, G, H):
