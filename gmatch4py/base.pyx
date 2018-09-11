@@ -216,6 +216,9 @@ cdef class Base:
         networkx.Graph
             Most common Subgrah
         """
+        R=G.copy()
+        R.remove_nodes_from(n for n in G if n not in H)
+        return R
 
     cpdef bint isAccepted(self,G,index,selected):
         """

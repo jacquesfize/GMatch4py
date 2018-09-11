@@ -69,4 +69,6 @@ f=True
 if f:
     if os.path.exists("build"):
         shutil.rmtree("build")
+    if os.path.exists("dist"):
+        shutil.rmtree("dist")
     os.system("find . -name \*.c -delete ; find . -name \*.cpp -delete ;")
