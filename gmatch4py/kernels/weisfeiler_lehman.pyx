@@ -18,6 +18,8 @@ import networkx as nx
 import numpy as np
 cimport numpy as np
 from ..base cimport Base
+from ..base import minmax_scale
+from scipy.sparse import csc_matrix,lil_matrix
 
 cdef class WeisfeleirLehmanKernel(Base):
 
@@ -51,7 +53,6 @@ cdef class WeisfeleirLehmanKernel(Base):
         """
 
         cdef int n = len(graph_list)
-        cdef np.ndarray phi
         cdef int n_nodes = 0
         cdef int n_max = 0
         cdef int i,j
@@ -67,6 +68,7 @@ cdef class WeisfeleirLehmanKernel(Base):
                 n_max = graph_list[i].number_of_nodes()
 
         phi = np.zeros((n_nodes, n), dtype=np.uint64)
+        phi=lil_matrix(phi)
 
         # INITIALIZATION: initialize the nodes labels for each graph
         # with their labels or with degrees (for unlabeled graphs)
@@ -101,9 +103,9 @@ cdef class WeisfeleirLehmanKernel(Base):
 
             graph_list[i]=nx.relabel_nodes(graph_list[i],label_lookup)
 
-        cdef np.ndarray[np.float64_t] k
+        # cdef np.ndarray[np.float64_t] k
         k = np.dot(phi.transpose(), phi)
-
+        print(1)
         # MAIN LOOP
         cdef int it = 0
 
@@ -140,10 +142,4 @@ cdef class WeisfeleirLehmanKernel(Base):
             k += np.dot(phi.transpose(), phi)
             it = it + 1
 
-        # Compute the normalized version of the kernel
-        cdef  np.ndarray[np.float64_t] k_norm = np.zeros((k.shape[0],k.shape[1]))
-        for i in range(k.shape[0]):
-            for j in range(k.shape[1]):
-                k_norm[i, j] = k[i, j] / np.sqrt(k[i, i] * k[j, j])
-
-        return k_norm
+        return minmax_scale(k).todense()
