@@ -142,4 +142,4 @@ cdef class WeisfeleirLehmanKernel(Base):
             k += np.dot(phi.transpose(), phi)
             it = it + 1
 
-        return minmax_scale(k).todense()
+        return np.ma.getdata(minmax_scale(k))
