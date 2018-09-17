@@ -9,6 +9,7 @@ GMatch4py algorithms were implemented with Cython to enhance performance.
  * Cython
  * networkx
  * numpy
+ * scikit-learn
  
 ## Installation
 
@@ -17,19 +18,14 @@ To install `GMatch4py`, run the following commands:
 ```
 $ git clone https://github.com/Jacobe2169/GMatch4py.git
 $ cd GMatch4py
-$ python3 setup.py install
+$ (sudo) python3 setup.py install
 ```
 
-or 
-
-```
-$ (sudo) pip3 install .
-```
 
 ## Get Started
 ### Graph input format
 
-In `Gmatch4py`, algorithms manipulate `networkx.Graph`, a complete graph model that 
+In `GMatch4py`, algorithms manipulate `networkx.Graph`, a complete graph model that 
 comes with a large spectrum of parser to load your graph from various inputs : `*.graphml,*.gexf,..` (check [here](https://networkx.github.io/documentation/stable/reference/readwrite/index.html) to see all the format accepted)
 
 ### Use Gmatch4py
@@ -61,8 +57,8 @@ print(result)
 The output is a similarity/distance matrix :
 ```
 Out[10]:
-array([[0., 7.],
-       [7., 0.]])
+array([[0., 14.],
+       [10., 0.]])
 ```
 This output result is "raw", if you wish to have normalized results in terms of distance (or similarity) you can use :
 
@@ -77,8 +73,9 @@ ged.distance(result)
 ## List of algorithms
 
  * DeltaCon and DeltaCon0 (*debug needed*) [1]
- * Vertex Ranking (*debug needed*) [2]
+ * Vertex Ranking [2]
  * Vertex Edge Overlap [2]
+ * Bag of Nodes (a bag of words model using nodes as vocabulary)
  * Bag of Cliques (a bag of words model using cliques as vocabulary)
  * Graph kernels
     * Random Walk Kernel (*debug needed*) [3]
@@ -109,15 +106,10 @@ ged.distance(result)
 
 Jacques Fize, *jacques[dot]fize[at]cirad[dot]fr*
 
-Some algorithms coming from other projects were integrated to Gmatch4py. **Be assured that
+Some algorithms from other projects were integrated to Gmatch4py. **Be assured that
 each code is associated with a reference to the original.**
 
 ## TODO List
 
-  * Debug algorithms --> :runner:
-  * Improve code structure and performance :runner:
-  * Simplify `setup.py` :heavy_check_mark:
-  * Some algorithms are distance and others are similarity measure. Must change the compare
-  methods so it can adapt to the user need. For example, maybe the user want to deal with 
-  graph similarity rather than distance between graph. :heavy_check_mark:
+  * Debug algorithms --> :runner: (almost done !)
   * Write the documentation :runner:

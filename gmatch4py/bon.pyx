@@ -6,8 +6,10 @@ cimport numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from .base cimport Base
 
-cdef class BOW(Base):
-
+cdef class BagOfNodes(Base):
+    """
+    We could call this algorithm Bag of nodes
+    """
     def __init__(self):
             Base.__init__(self,0,True)
 

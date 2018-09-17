@@ -18,3 +18,4 @@ from .mcs import *
 from .vertex_edge_overlap import *
 from .vertex_ranking import *
 from .jaccard import *
+from .bon import *
