@@ -8,6 +8,7 @@ cdef class AbstractGraphEditDistance(Base):
     cdef double edge_del
     cdef double edge_ins
     cdef np.ndarray cost_matrix
+    cdef bint weighted
 
     cpdef double distance_ged(self,G,H)
     cdef list edit_costs(self,G,H)

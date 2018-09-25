@@ -55,8 +55,8 @@ setup(
     packages=["gmatch4py","gmatch4py.helpers"],
     ext_modules=extensions,
     cmdclass={'build_ext': build_ext},
-    setup_requires=["numpy","networkx","scipy"],
-    install_requires=["numpy","networkx","scipy"],
+    setup_requires=["numpy","networkx","scipy",'scikit-learn'],
+    install_requires=["numpy","networkx","scipy",'scikit-learn'],
     version="0.2.2",
     classifiers=[
             "Programming Language :: Python :: 3",

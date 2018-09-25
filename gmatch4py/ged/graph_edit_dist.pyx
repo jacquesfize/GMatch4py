@@ -11,9 +11,9 @@ from ..base cimport intersection,union_
 
 cdef class GraphEditDistance(AbstractGraphEditDistance):
 
-    def __init__(self,node_del,node_ins,edge_del,edge_ins):
+    def __init__(self,node_del,node_ins,edge_del,edge_ins,weighted=False):
         AbstractGraphEditDistance.__init__(self,node_del,node_ins,edge_del,edge_ins)
-
+        self.weighted=weighted
     cpdef double substitute_cost(self, node1, node2, G, H):
         return self.relabel_cost(node1, node2, G, H)
 
@@ -54,12 +54,12 @@ cdef class GraphEditDistance(AbstractGraphEditDistance):
 
     cdef double delete_cost(self, int i, int j, nodesG, G):
         if i == j:
-            return self.node_del+(G.degree(nodesG[i])*self.edge_del) # Deleting a node implicate to delete in and out edges
+            return self.node_del+(G.degree(nodesG[i],weight=("weight" if self.weighted else None))*self.edge_del) # Deleting a node implicate to delete in and out edges
         return sys.maxsize
 
     cdef double insert_cost(self, int i, int j, nodesH, H):
         if i == j:
-            deg=H.degree(nodesH[j])
+            deg=H.degree(nodesH[j],weight=("weight" if self.weighted else None))
             if isinstance(deg,dict):deg=0
             return self.node_ins+(deg*self.edge_ins)
         else:
