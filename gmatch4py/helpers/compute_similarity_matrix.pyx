@@ -139,7 +139,7 @@ def run(config_filename):
     if not os.path.exists(config.output_dir):
         print("Output matrix directory doesn't exist!")
         print("Creating directory")
-        os.makedirs(args.output_dir)
+        os.makedirs(config.output_dir)
         print("Directory created")
 
     selected=None
