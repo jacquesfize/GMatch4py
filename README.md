@@ -15,12 +15,11 @@ GMatch4py algorithms were implemented with Cython to enhance performance.
 
 To install `GMatch4py`, run the following commands:
 
+```bash
+git clone https://github.com/Jacobe2169/GMatch4py.git
+cd GMatch4py
+(sudo) python3 setup.py install
 ```
-$ git clone https://github.com/Jacobe2169/GMatch4py.git
-$ cd GMatch4py
-$ (sudo) python3 setup.py install
-```
-
 
 ## Get Started
 ### Graph input format
@@ -31,7 +30,7 @@ comes with a large spectrum of parser to load your graph from various inputs : `
 ### Use Gmatch4py
 If you want to use algorithms like *graph edit distances*, here is an example:
 
-```{python}
+```python
 # Gmatch4py use networkx graph 
 import networkx as nx 
 # import the GED using the munkres algorithm
@@ -39,7 +38,7 @@ import gmatch4py as gm
 ```
 
 In this example, we use generated graphs using `networkx` helpers:
-```{python}
+```python
 g1=nx.complete_bipartite_graph(5,4) 
 g2=nx.complete_bipartite_graph(6,4)
 ```
@@ -48,21 +47,21 @@ All graph matching algorithms in `Gmatch4py work this way:
  * Each algorithm is associated with an object, each object having its specific parameters. In this case, the parameters are the edit costs (delete a vertex, add a vertex, ...)
  * Each object is associated with a `compare()` function with two parameters. First parameter is **a list of the graphs** you want to **compare**, i.e. measure the distance/similarity (depends on the algorithm). Then, you can specify a sample of graphs to be compared to all the other graphs. To this end, the second parameter should be **a list containing the indices** of these graphs (based on the first parameter list). If you rather compute the distance/similarity **between all graphs**, just use the `None` value.
 
-```{python}
+```python
 ged=gm.GraphEditDistance(1,1,1,1) # all edit costs are equal to 1
 result=ged.compare([g1,g2],None) 
 print(result)
 ```
 
 The output is a similarity/distance matrix :
-```
+```python
 Out[10]:
 array([[0., 14.],
        [10., 0.]])
 ```
 This output result is "raw", if you wish to have normalized results in terms of distance (or similarity) you can use :
 
-```
+```python
 ged.similarity(result)
 # or 
 ged.distance(result)

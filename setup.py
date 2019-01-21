@@ -3,6 +3,7 @@ import sys, os, shutil
 from distutils.core import setup
 from distutils.extension import Extension
 import numpy as np
+import platform
 try:
     from Cython.Build import cythonize
     from Cython.Distutils import build_ext
@@ -29,6 +30,16 @@ def scandir(dir, files=[]):
 def makeExtension(extName):
     global libs
     extPath = extName.replace(".", os.path.sep)+".pyx"
+
+    ## For Mojave Users
+    if platform.system() == "Darwin":
+        if "10.14" in platform.mac_ver()[0]:
+            return Extension(
+            extName,
+            [extPath],include_dirs=[np.get_include()],language='c++',libraries=libs,
+            extra_compile_args=["-stdlib=libc++"]
+            )
+    
     return Extension(
         extName,
         [extPath],include_dirs=[np.get_include()],language='c++',libraries=libs

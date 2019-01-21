@@ -106,3 +106,4 @@ venv.bak/
 *.c
 .DS_Store
 .idea
+.vscode
