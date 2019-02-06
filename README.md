@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.com/Jacobe2169/GMatch4py.svg?branch=graph_cython)](https://travis-ci.com/Jacobe2169/GMatch4py)
 # GMatch4py a graph matching library for Python
 
 GMatch4py is a library dedicated to graph matching. Graph structure are stored in NetworkX graph objects.
