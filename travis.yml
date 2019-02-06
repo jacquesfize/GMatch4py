@@ -3,8 +3,4 @@ python:
   - "3.6"
 # command to install dependencies
 install:
-  - pip install .
-
-branches:
-  only:
-  - graph_cython
+  - python setup.py install .
