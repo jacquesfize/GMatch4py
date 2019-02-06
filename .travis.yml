@@ -9,3 +9,6 @@ notifications:
 install:
     - pip install -q cython numpy networkx scipy scikit-learn pandas
     - python setup.py install
+
+script:
+  - pytest gmatch4py
