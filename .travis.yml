@@ -10,4 +10,4 @@ install:
     - python setup.py build_ext --inplace
 
 script:
-  - pytest
+  - pytest gmatch4py/test/test.py
