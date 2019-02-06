@@ -1,6 +1,5 @@
 language: python
 python:
-  - "2.7"
   - "3.6"
 
 notifications:
@@ -8,7 +7,7 @@ notifications:
 
 install:
     - pip install -q cython numpy networkx scipy scikit-learn pandas
-    - python setup.py install
+    - python setup.py build_ext --inplace
 
 script:
-  - pytest gmatch4py
+  - pytest
