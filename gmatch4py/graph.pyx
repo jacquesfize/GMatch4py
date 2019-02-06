@@ -6,85 +6,175 @@ import numpy as np
 cimport numpy as np
 import networkx as nx
 
-def fromNXGraph(G):
-    G=nx.relabel_nodes(G,mapping={n:str(n)for n in G.nodes()},copy=True)
-    nodes,n_attr=zip(*list(G.nodes(data=True)))
-    e1,e2,e_attr=zip(*list(G.edges(data=True)))
-    eds=list(zip(e1,e2))
-    _,deg=zip(*list(G.degree))
-    return Graph(list(nodes),eds,list(deg),list(deg),list(n_attr),list(e_attr))
-
-def fromNXDigraph(G):
-    G=nx.relabel_nodes(G,mapping={n:str(n)for n in G.nodes()},copy=True)
-    nodes,n_attr=zip(*list(G.nodes(data=True)))
-    e1,e2,e_attr=zip(*list(G.edges(data=True)))
-    eds=list(zip(e1,e2))
-    _,deg_in=zip(*list(G.in_degree))
-    _,deg_out=zip(*list(G.out_degree))
-    return Graph(list(nodes),eds,list(deg_in),list(deg_out),list(n_attr),list(e_attr),is_directed=True)
-
-def fromNXMultiDigraph(G : networkx.MultiDiGraph):
-    G=nx.relabel_nodes(G,mapping={n:str(n)for n in G.nodes()},copy=True)
-    nodes,n_attr=zip(*list(G.nodes(data=True)))
-    e1,e2,e_attr=zip(*list(G.edges(data=True)))
-    eds=list(zip(e1,e2))
-    _,deg_in=zip(*list(G.in_degree))
-    _,deg_out=zip(*list(G.out_degree))
-    return Graph(list(nodes),eds,list(deg_in),list(deg_out),list(n_attr),list(e_attr),is_directed=True)
-
 cdef class Graph:
 
-    cdef bint is_directed
-    cdef bint is_multi
+    # GRAPH PROPERTY ATTRIBUTES
+    ###########################
+    cdef bint is_directed # If the graph is directed
+    cdef bint is_multi # If the graph is a Multi-Graph
+    cdef bint is_node_attr
+    cdef bint is_edge_attr
 
-    cdef list nodes_list #id list 
-    cdef list edges_list # edge list 
-    cdef dict edge_hash_map #[id1,[id2,hash]] 
-    cdef set edges_hash 
-    cdef set nodes_set 
+    # ATTR VAL ATTRIBUTES
+    #####################
+    cdef str node_attr_key # Key that contains the main attr value for a node
+    cdef str edge_attr_key # Key that contains the main attr value for an edge
+    cdef set unique_node_attr_vals # list 
+    cdef set unique_edge_attr_vals # list 
     
-    cdef long number_of_nodes 
-    cdef long number_of_edges 
 
-    cdef list attr_nodes 
-    cdef list attr_edges 
+    ## NODE ATTRIBUTES
+    #################
 
-    cdef long[:] nodes_degree_in_all 
-    cdef long[:] nodes_degree_out_all
+    cdef list nodes_list # list of nodes ids
+    cdef list nodes_attr_list # list of attr value for each node (following nodes list order)
+    cdef list nodes_hash # hash representation of every node
+    cdef set nodes_hash_set # hash representation of every node (set version for intersection and union operation)
+    cdef dict nodes_idx # index of each node in `nodes_list`
+    cdef list nodes_weight # list that contains each node's weight (following nodes_list order)
+    cdef long[:] nodes_degree # degree list
+    cdef long[:] nodes_degree_in # in degree list
+    cdef long[:] nodes_degree_out # out degree list
+    cdef dict degree_per_attr # degree information per attr val
+    cdef list attr_nodes # list of attr(dict) values for each node
 
-    def __init__(self,nodes_list,edges_list,degree_in,degree_out,nodes_attr=[],edge_attr=[],is_directed=False,is_multi=False):
-        self.is_directed = is_directed
-        self.is_multi = is_multi
+    # EDGES ATTRIBUTES
+    ##################
+    
+    cdef list edges_list # edge list
+    cdef list edges_attr_list # list of attr value for each edge (following nodes list order)
+    cdef list edges_hash # hash representation of every edges ## A VOIR !
+    cdef set edges_hash_set # set of hash representation of every edges (set version for intersection and union operation)
+    cdef dict edges_weight # list that contains each node's weight (following nodes_list order)
+    cdef dict edges_hash_map #[id1,[id2,hash]] 
+    cdef list attr_edges # list of attr(dict) values for each edge 
+
+    # SIZE INDICATOR
+    ###############
+
+    cdef long number_of_nodes  # number of nodes
+    cdef long number_of_edges # number of edges
+
+    cdef dict number_of_edges_per_attr # number of nodes per attr value
+    cdef dict number_of_nodes_per_attr # number of edges per attr value
+
+    cdef object nx_g
+    def __init__(self,G, node_attr_key="",edge_attr_key=""):
+        self.nx_g=G
+
+        #GRAPH PROPERTY INIT
+        self.is_directed = G.is_directed()
+        self.is_multi = G.is_multigraph()
+        self.is_node_attr=(True if node_attr_key else False)
+        self.is_edge_attr=(True if edge_attr_key else False)
         
-        self.nodes_list=nodes_list
-        self.nodes_set=set(nodes_list)
-        self.number_of_nodes=len(nodes_list)
+        if len(G) == 0:
+            return
         
-        self.attr_nodes=nodes_attr
-        self.attr_edges=edge_attr
+        a,b=list(zip(*list(G.nodes(data=True))))
+        self.nodes_list,self.attr_nodes=list(a),list(b)
+        if G.number_of_edges()>0:
+            e1,e2,d=zip(*list(G.edges(data=True)))
+            self.attr_edges=list(d)
+            self.edges_list=list(zip(e1,e2))
+        else:
+            self.edges_list=[]
+            self.attr_edges=[]
+
+        if self.is_node_attr:
+            self.node_attr_key = node_attr_key
+            self.nodes_attr_list = [attr_dict[node_attr_key] for attr_dict in self.attr_nodes]
+            self.unique_node_attr_vals=set(self.nodes_attr_list)
         
-        self.edges_list=edges_list
-        self.edges_hash=set([])
-        self.edge_hash_map = {}
+        if self.is_edge_attr:
+            self.edge_attr_key = edge_attr_key
+            self.edges_attr_list = [attr_dict[edge_attr_key] for attr_dict in self.attr_edges]
+            self.unique_edge_attr_vals=set(self.edges_attr_list)
         
-        for x,y in edges_list:
-            if not x in self.edge_hash_map:self.edge_hash_map[x]={}
-            hash_=self.hash(x,y)
-            self.edge_hash_map[x][y]=hash_
-            self.edges_hash.add(hash_)
+        # NODE Information init
+        #######################
+        
+        self.nodes_hash=[self.hash_node_attr(node,self.nodes_attr_list[ix]) if self.is_node_attr else self.hash_node(node) for ix, node in enumerate(self.nodes_list) ]
+        self.nodes_hash_set=set(self.nodes_hash)
+        self.nodes_idx={node:ix for ix, node in enumerate(self.nodes_list)}
+        self.nodes_weight=[attr_dict["weight"] if "weight" in attr_dict else 1 for attr_dict in self.attr_nodes]
+        degree_all=[]
+        degree_in=[]
+        degree_out=[]
+        if self.is_edge_attr:
+            self.degree_per_attr={attr_v:{n:{"in":0,"out":0} for n in self.nodes_list} for attr_v in self.unique_edge_attr_vals}
+            
+        # Retrieving Degree Information
+        for n in self.nodes_list:
+            degree_all.append(G.degree(n))
+            if self.is_directed:
+                degree_in.append(G.in_degree(n))
+                degree_out.append(G.out_degree(n))
+            else:
+                degree_in.append(degree_all[-1])
+                degree_out.append(degree_all[-1])
+            if self.is_edge_attr:
+                if self.is_directed:
+                    in_edge=list(G.in_edges(n,data=True))
+                    out_edge=list(G.in_edges(n,data=True))
+                    for n1,n2,attr_dict in in_edge:
+                        self.degree_per_attr[attr_dict[self.edge_attr_key]][n]["in"]+=1
+        
+                    for n1,n2,attr_dict in out_edge:
+                        self.degree_per_attr[attr_dict[self.edge_attr_key]][n]["out"]+=1
+    
+                else:
+                    edges=G.edges(n,data=True)
+                    for n1,n2,attr_dict in edges:
+                        self.degree_per_attr[attr_dict[self.edge_attr_key]][n]["in"]+=1
+                        self.degree_per_attr[attr_dict[self.edge_attr_key]][n]["out"]+=1
+        
+        self.nodes_degree=np.array(degree_all)
+        self.nodes_degree_in=np.array(degree_in)
+        self.nodes_degree_out=np.array(degree_out)
+
+        # EDGE INFO INIT
+        #################
+        
+        self.edges_hash=[]
+        self.edges_hash_map = {}
+        for ix, ed in enumerate(self.edges_list):
+            e1,e2=ed
+            if not e1 in self.edges_hash_map:self.edges_hash_map[e1]={}
+            self.edges_hash_map[e1][e2]=self.hash_edge_attr(e1,e2,self.edges_attr_list[ix]) if self.is_edge_attr else self.hash_edge(e1,e2)
+            self.edges_hash.append(self.edges_hash_map[e1][e2]) 
+        self.edges_hash_set=set(self.edges_hash)
+        
+        self.edges_weight={}
+        for e1,e2,attr_dict in list(G.edges(data=True)):
+            self.edges_hash_map[e1][e2]=attr_dict["weight"] if "weight" in attr_dict else 1 
         
         self.number_of_edges = len(self.edges_list)
         self.number_of_nodes = len(self.nodes_list)
         
-        self.nodes_degree_in_all=np.array(degree_in)
-        self.nodes_degree_out_all=np.array([0]*self.number_of_nodes)
-        if self.is_directed:
-            self.nodes_degree_out_all=np.array(degree_out)
-            
+        if self.is_edge_attr and self.number_of_edges >0:
+            self.number_of_edges_per_attr={attr:0 for attr in self.unique_edge_attr_vals}
+            for _,_,attr_dict in list(G.edges(data=True)):
+                self.number_of_edges_per_attr[attr_dict[self.edge_attr_key]]+=1
+        
+        if self.is_node_attr and self.number_of_nodes >0:
+            self.number_of_nodes_per_attr={attr:0 for attr in self.unique_node_attr_vals}
+            for _,attr_dict in list(G.nodes(data=True)):
+                self.number_of_nodes_per_attr[attr_dict[self.node_attr_key]]+=1
 
     
-    cpdef str hash(self,str n1,str n2):
+    # HASH FUNCTION
+    cpdef str hash_node(self,str n1):
+        return "{0}".format(n1)
+
+    cpdef str hash_edge(self,str n1,str n2):
         return "_".join(sorted([n1,n2]))
+
+    cpdef str hash_node_attr(self,str n1, str attr_value):
+        return "_".join(sorted([n1,attr_value]))
+
+    cpdef str hash_edge_attr(self,str n1,str n2, str attr_value):
+        return "_".join([n1,n2,attr_value])
     
     ## EXIST FUNCTION
     cdef bint has_node(self,str n_id):
@@ -94,52 +184,128 @@ cdef class Graph:
 
     cdef bint has_edge(self,str n_id1,str n_id2):
         if self.is_directed:
-            if n_id1 in self.edge_hash_map and n_id2 in self.edge_hash_map[n_id1][n_id2]:
+            if n_id1 in self.edges_hash_map and n_id2 in self.edges_hash_map[n_id1][n_id2]:
                 return True
         else:
-            if n_id1 in self.edge_hash_map and n_id2 in self.edge_hash_map[n_id1][n_id2]:
+            if n_id1 in self.edges_hash_map and n_id2 in self.edges_hash_map[n_id1][n_id2]:
                 return True
-            if n_id2 in self.edge_hash_map and n_id1 in self.edge_hash_map[n_id2][n_id1]:
+            if n_id2 in self.edges_hash_map and n_id1 in self.edges_hash_map[n_id2][n_id1]:
                 return True
         return False
-    
+
+    ## LEN FUNCTION
     cpdef int size_node_intersect(self,Graph G):
-        return len(self.nodes_set.intersection(G.nodes_set))
+        return len(self.nodes_hash_set.intersection(G.nodes_hash_set))
     cpdef int size_node_union(self,Graph G):
-        return len(self.nodes_set.union(G.nodes_set))
+        return len(self.nodes_hash_set.union(G.nodes_hash_set))
     
     cpdef int size_edge_intersect(self,Graph G):
-        return len(self.edges_hash.intersection(G.edges_hash))
+        return len(self.edges_hash_set.intersection(G.edges_hash_set))
     cpdef int size_edge_union(self,Graph G):
-        return len(self.edges_hash.union(G.edges_hash))
-
+        return len(self.edges_hash_set.union(G.edges_hash_set))
+    
+        ## GETTER
     def nodes(self,data=False):
         if data:
-            return self.nodes_list,self.nodes_attr
+            return self.nodes_list,self.attr_nodes
         else:
             return self.nodes_list
         
     
     def edges(self,data=False):
         if data:
-            return self.edges_list,self.edge_attr
+            return self.edges_list,self.attr_edges
         else:
             return self.edges_list
 
-    cpdef get_edges_hash(self):
-        return self.edges_hash
 
-    cpdef size(self):
+    cpdef set get_edges_hash(self):
+        return self.edges_hash_set
+
+    cpdef long size(self):
         return self.number_of_nodes
-
-    cpdef density(self):
-        return self.number_of_edges
-
-    cpdef degree_in(self):
-        return self.nodes_degree_in_all
-    cpdef degree_out(self):
-        return self.nodes_degree_out_all
     
+    cpdef int size_attr(self, attr_val):
+        return self.number_of_nodes_per_attr[attr_val]
+
+    cpdef long density(self):
+        return self.number_of_edges
+    
+    cpdef int density_attr(self, str attr_val):
+        return self.number_of_edges_per_attr[attr_val]
+
+    cpdef int degree(self,str n_id):
+        return self.nodes_degree[self.nodes_idx[n_id]]
+    
+    cpdef int in_degree(self,str n_id):
+        return self.nodes_degree_in[self.nodes_idx[n_id]]
+    
+    cpdef int out_degree(self,str n_id):
+        return self.nodes_degree_out[self.nodes_idx[n_id]]
+
+    cpdef int in_degree_attr(self,str n_id,str attr_val):
+        if not self.is_edge_attr and not self.is_directed:
+            raise AttributeError("No edge attribute have been defined")
+        return self.degree_per_attr[attr_val][n_id]["in"]
+
+    cpdef int out_degree_attr(self,str n_id,str attr_val):
+        if not self.is_edge_attr and not self.is_directed:
+            raise AttributeError("No edge attribute have been defined")
+        return self.degree_per_attr[attr_val][n_id]["out"]
+
+    cpdef int degree_attr(self,str n_id,str attr_val):
+        if not self.is_edge_attr:
+            raise AttributeError("No edge attribute have been defined")
+        return self.degree_per_attr[attr_val][n_id]["out"] + self.degree_per_attr[attr_val][n_id]["in"]
+    
+    #GRAPH SETTER
+    def add_node(self,str id_,**kwargs):
+        if not self.node_attr_key in kwargs:
+            print("Node not added because information lacks")
+            return self
+        if id_ in self.nodes_idx:
+            print("Already in G")
+            return self
+        G=self.nx_g.copy()
+        G.add_node(id_,**kwargs)
+        return Graph(G,self.node_attr_key,self.edge_attr_key)
+    
+    
+    def add_edge(self,str n1,str n2,**kwargs):
+        G=self.nx_g.copy()
+        G.add_edge(n1,n2,**kwargs)
+        return Graph(G,self.node_attr_key,self.edge_attr_key)
+    
+    def remove_node(self,str id_):
+        if not id_ in self.nodes_idx:
+            print("Already removed in G")
+            return self
+        G=self.nx_g.copy()
+        G.remove_node(id_)
+        return Graph(G,self.node_attr_key,self.edge_attr_key)
+    
+    def remove_edge(self,str n1,str n2,**kwargs):
+        G=self.nx_g.copy()
+        edges=G.edges([n1,n2],data=True)
+        if len(edges) == 0:
+            return self
+        elif len(edges)<2:
+            G.remove_edge(n1,n2)
+        else:
+            if not self.edge_attr_key in kwargs:
+                for i in range(len(edges)):
+                    G.remove_edge(n1,n2,i)
+            else:
+                key,val,i=self.edge_attr_key, kwargs[self.edge_attr_key],0
+                for e1,ed2,attr_dict in edges:
+                    if attr_dict[key] == val:
+                        G.remove_edge(n1,n2,i)
+                        break
+                    i+=1
+                    
+        return Graph(G,self.node_attr_key,self.edge_attr_key)
+
+
     cpdef test(self):
         print(self.has_node("1"))
         print(self.has_edge("1","2"))
