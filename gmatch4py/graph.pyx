@@ -305,17 +305,4 @@ cdef class Graph:
                     
         return Graph(G,self.node_attr_key,self.edge_attr_key)
 
-
-    cpdef test(self):
-        print(self.has_node("1"))
-        print(self.has_edge("1","2"))
-        G2=Graph(["1","2","3","4"],[("1","2"),("2","3"),("1","4")],[2,2,1],[2,2,1])
-        print(self.size_node_union(G2))
-        print(self.size_node_intersect(G2))
-        print(self.size_edge_union(G2))
-        print(self.size_edge_intersect(G2))
-
-if __name__ == "__main__":
-    G=Graph(["1","2","3"],[("1","2"),("2","3")],[1,2,1],[1,2,1])
-    G.test()
-
+    
