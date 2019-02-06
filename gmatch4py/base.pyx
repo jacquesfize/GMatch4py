@@ -223,8 +223,8 @@ cdef class Base:
     cpdef bint isAccepted(self,G,index,selected):
         """
         Indicate if the graph will be compared to the other. A graph is "accepted" if :
-         * G exists(!= None) and not empty (|vertices(G)| >0)
-         * If selected graph to compare were indicated, check if G exists in selected
+            * G exists(!= None) and not empty (|vertices(G)| >0)
+            * If selected graph to compare were indicated, check if G exists in selected
         
         Parameters
         ----------
@@ -244,7 +244,7 @@ cdef class Base:
         if not G:
             f=False
         elif len(G)== 0:
-           f=False
+            f=False
         if selected:
             if not index in selected:
                 f=False
