@@ -1,6 +1,11 @@
 language: python
 python:
+  - "2.7"
   - "3.6"
-# command to install dependencies
+
+notifications:
+  email: false
+
 install:
-  - python setup.py install .
+    - pip install -q cython numpy networkx scipy scikit-learn pandas
+    - python setup.py install
