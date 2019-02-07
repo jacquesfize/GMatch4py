@@ -16,3 +16,4 @@ cdef class AbstractGraphEditDistance(Base):
     cdef double insert_cost(self, int i, int j, nodesH, H)
     cdef double delete_cost(self, int i, int j, nodesG, G)
     cpdef double substitute_cost(self, node1, node2, G, H)
+    

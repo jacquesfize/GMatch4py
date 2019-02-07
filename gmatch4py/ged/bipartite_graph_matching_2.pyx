@@ -2,7 +2,8 @@
 import numpy as np
 cimport numpy as np
 from ..base cimport Base
-
+from cython.parallel cimport prange,parallel
+from ..helpers.general import parsenx2graph
 cdef class BP_2(Base):
 
 
@@ -32,7 +33,7 @@ cdef class BP_2(Base):
         self.edge_del = edge_del
         self.edge_ins = edge_ins
 
-    cpdef np.ndarray compare(self,list listgs, list selected):
+    cpdef np.ndarray compare_old(self,list listgs, list selected):
         cdef int n = len(listgs)
         cdef np.ndarray comparison_matrix = np.zeros((n, n)).astype(float)
         cdef int i,j
@@ -45,6 +46,27 @@ cdef class BP_2(Base):
                 else:
                     comparison_matrix[i, j] = np.inf
                 comparison_matrix[j, i] = comparison_matrix[i, j]
+
+        return comparison_matrix
+
+    cpdef np.ndarray compare(self,list listgs, list selected):
+        cdef int n = len(listgs)
+        cdef list new_gs=parsenx2graph(listgs)
+        cdef double[:,:] comparison_matrix = np.zeros((n, n))
+        cdef bint[:] selected_test = self.get_selected_array(selected,n)
+        cdef int i,j
+        cdef long[:] n_nodes = np.array([g.size() for g in new_gs])
+        cdef long[:] n_edges = np.array([g.density() for g in new_gs])
+
+        with nogil, parallel(num_threads=4):
+            for i in prange(n,schedule='static'):
+                for j in range(i,n):
+                    if  n_nodes[i] > 0 and n_nodes[j] > 0  and selected_test[i] == True:
+                        with gil:
+                            comparison_matrix[i, j] = self.bp2(new_gs[i], new_gs[j])
+                    else:
+                        comparison_matrix[i, j] = 0
+                    comparison_matrix[j, i] = comparison_matrix[i, j]
 
         return comparison_matrix
 
@@ -100,8 +122,8 @@ cdef class BP_2(Base):
             list containing costs from the optimal edit path
         """
         cdef list psi_=[]
-        cdef list nodes1 = list(g1.nodes)
-        cdef list nodes2 = list(g2.nodes)
+        cdef list nodes1 = list(g1.nodes())
+        cdef list nodes2 = list(g2.nodes())
         for u in nodes1:
             v=None
             for w in nodes2:
@@ -125,9 +147,9 @@ cdef class BP_2(Base):
         :param g2: Second Graph
         :return:
         """
-        cdef np.ndarray min_sum = np.zeros(len(g1))
-        nodes1 = list(g1.nodes)
-        nodes2 = list(g2.nodes)
+        cdef np.ndarray min_sum = np.zeros(g1.size())
+        nodes1 = list(g1.nodes())
+        nodes2 = list(g2.nodes())
         nodes2.extend([None])
         cdef np.ndarray min_i
         for i in range(len(nodes1)):
@@ -178,8 +200,8 @@ cdef class BP_2(Base):
         """
 
         #if isinstance(g1, nx.MultiDiGraph):
-        cdef list edges1 = list(g1.edges(n1)) if n1 else []
-        cdef list edges2 =  list(g2.edges(n2)) if n2 else []
+        cdef list edges1 = g1.get_edges_no(n1) if n1 else []
+        cdef list edges2 = g2.get_edges_no(n2) if n2 else []
 
         cdef np.ndarray min_sum = np.zeros(len(edges1))
         edges2.extend([None])

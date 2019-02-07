@@ -59,7 +59,9 @@ cdef class Graph:
             self.degree_per_attr_weighted={attr_v:{n:{"in":0,"out":0} for n in self.nodes_list} for attr_v in self.unique_edge_attr_vals}
             
         # Retrieving Degree Information
+        self.edges_of_nodes={}
         for n in self.nodes_list:
+            self.edges_of_nodes[n]=[self.hash_edge_attr(e1,e2,attr_dict[self.edge_attr_key]) if self.is_edge_attr else self.hash_edge(e1,e2) for e1,e2,attr_dict in G.edges(n,data=True)]
             degree_all.append(G.degree(n))
             degree_all_weighted.append(G.degree(n,weight="weight"))
             if self.is_directed:
@@ -161,12 +163,12 @@ cdef class Graph:
 
     cpdef bint has_edge(self,str n_id1,str n_id2):
         if self.is_directed:
-            if n_id1 in self.edges_hash_map and n_id2 in self.edges_hash_map[n_id1][n_id2]:
+            if n_id1 in self.edges_hash_map and n_id2 in self.edges_hash_map[n_id1]:
                 return True
         else:
-            if n_id1 in self.edges_hash_map and n_id2 in self.edges_hash_map[n_id1][n_id2]:
+            if n_id1 in self.edges_hash_map and n_id2 in self.edges_hash_map[n_id1]:
                 return True
-            if n_id2 in self.edges_hash_map and n_id1 in self.edges_hash_map[n_id2][n_id1]:
+            if n_id2 in self.edges_hash_map and n_id1 in self.edges_hash_map[n_id2]:
                 return True
         return False
 
@@ -199,12 +201,14 @@ cdef class Graph:
         else:
             return self.edges_list
     
-    cpdef list get_edges_(self,e1,e2):
+    cpdef list get_edges_ed(self,str e1,str e2):
         if self.is_edge_attr:
             hashes=self.edges_hash_map[e1][e2]
             return [(e1,e2,self.edges_attr_list[self.edges_hash_idx[hash_]])for hash_ in hashes]
         else:
             return [(e1,e2,None)]
+    cpdef list get_edges_no(self,str n):
+        return self.edges_of_nodes[n]
 
     cpdef dict get_edge_attr(self,edge_hash):
         return self.edges_attr_list[self.edges_hash_idx[edge_hash]]

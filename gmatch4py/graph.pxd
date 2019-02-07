@@ -38,6 +38,7 @@ cdef class Graph:
     cdef dict degree_per_attr # degree information per attr val
     cdef dict degree_per_attr_weighted # degree information per attr val
     cdef list attr_nodes # list of attr(dict) values for each node
+    cdef dict edges_of_nodes # list of egdes connected to each node
 
     # EDGES ATTRIBUTES
     ##################
@@ -107,7 +108,8 @@ cdef class Graph:
     ## GETTER
     #########
 
-    cpdef list get_edges_(self,e1,e2)
+    cpdef list get_edges_ed(self,str e1, str e2)
+    cpdef list get_edges_no(self,str n)
     cpdef set get_edges_hash(self)
     cpdef set get_nodes_hash(self)
     

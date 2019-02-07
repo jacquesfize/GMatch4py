@@ -70,7 +70,7 @@ setup(
     cmdclass={'build_ext': build_ext},
     setup_requires=["numpy","networkx","scipy",'scikit-learn'],
     install_requires=["numpy","networkx","scipy",'scikit-learn'],
-    version="0.2.2",
+    version="0.2.2alpha",
     classifiers=[
             "Programming Language :: Python :: 3",
             "License :: OSI Approved :: MIT License",
@@ -78,7 +78,7 @@ setup(
         ]
 )
 #Clean cpp and compiled file
-f=False
+f=True
 if f:
     if os.path.exists("build"):
         shutil.rmtree("build")

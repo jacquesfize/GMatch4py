@@ -136,6 +136,17 @@ cdef class Base:
         else:
             self.type_alg=type_alg
         self.normalized=normalized
+
+    cpdef list get_selected_array(self,selected,size_corpus):
+        cdef list selected_test = [True]*size_corpus
+        if selected:
+            selected_test = [False]*size_corpus
+            for ix in range(len(selected)):
+                selected_test[ix]=True
+        return selected
+
+    cpdef np.ndarray compare_old(self,list listgs, list selected):
+        pass
     cpdef np.ndarray compare(self,list graph_list, list selected):
         """
         Return the similarity/distance matrix using the current algorithm.
