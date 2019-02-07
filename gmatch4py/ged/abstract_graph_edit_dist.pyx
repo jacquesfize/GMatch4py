@@ -2,11 +2,16 @@
 from __future__ import print_function
 
 import sys
-
+import warnings
 import numpy as np
-from scipy.optimize import linear_sum_assignment
+try:
+    from munkres import munkres
+except ImportError:
+    warnings.warn("To obtain optimal results install the Cython 'munkres' module at  https://github.com/jfrelinger/cython-munkres-wrapper")
+    from scipy.optimize import linear_sum_assignment as munkres
 cimport numpy as np
 from ..base cimport Base
+import networkx as nx
 
 cdef class AbstractGraphEditDistance(Base):
 
@@ -35,9 +40,7 @@ cdef class AbstractGraphEditDistance(Base):
         :return: 
         """
         cdef np.ndarray cost_matrix = self.create_cost_matrix(G,H).astype(float)
-        row_ind,col_ind = linear_sum_assignment(cost_matrix)
-        cdef int f=len(row_ind)
-        return [cost_matrix[row_ind[i]][col_ind[i]] for i in range(f)]
+        return cost_matrix[munkres(cost_matrix)].tolist()
 
     cpdef np.ndarray create_cost_matrix(self, G, H):
         """
@@ -53,8 +56,13 @@ cdef class AbstractGraphEditDistance(Base):
 
         The delete -> delete region is filled with zeros
         """
-        cdef int n = G.number_of_nodes()
-        cdef int m = H.number_of_nodes()
+        cdef int n,m
+        try:
+            n = G.number_of_nodes()
+            m = H.number_of_nodes()
+        except:
+            n = G.size()
+            m = H.size()
         cdef np.ndarray cost_matrix = np.zeros((n+m,n+m))
         cdef list nodes1 = list(G.nodes())
         cdef list nodes2 = list(H.nodes())
@@ -89,7 +97,7 @@ cdef class AbstractGraphEditDistance(Base):
         for i in range(n):
             for j in range(n):
                 g1,g2=listgs[i],listgs[j]
-                f=self.isAccepted(g1,i,selected)
+                f=self.isAccepted(g1 if isinstance(g1,nx.Graph) else g1.get_nx(),i,selected)
                 if f:
                     comparison_matrix[i, j] = self.distance_ged(g1, g2)
                 else:

@@ -42,7 +42,9 @@ def makeExtension(extName):
     
     return Extension(
         extName,
-        [extPath],include_dirs=[np.get_include()],language='c++',libraries=libs
+        [extPath],include_dirs=[np.get_include()],language='c++',libraries=libs,
+        #extra_compile_args = ["-O0", "-fopenmp"],extra_link_args=['-fopenmp']
+
         )
 
 # get the list of extensions
@@ -76,7 +78,7 @@ setup(
         ]
 )
 #Clean cpp and compiled file
-f=True
+f=False
 if f:
     if os.path.exists("build"):
         shutil.rmtree("build")
