@@ -53,22 +53,22 @@ cdef class BP_2(Base):
         cdef int n = len(listgs)
         cdef list new_gs=parsenx2graph(listgs)
         cdef double[:,:] comparison_matrix = np.zeros((n, n))
-        cdef bint[:] selected_test = self.get_selected_array(selected,n)
+        cdef double[:] selected_test = self.get_selected_array(selected,n)
         cdef int i,j
         cdef long[:] n_nodes = np.array([g.size() for g in new_gs])
         cdef long[:] n_edges = np.array([g.density() for g in new_gs])
 
-        with nogil, parallel(num_threads=4):
+        with nogil, parallel(num_threads=self.cpu_count):
             for i in prange(n,schedule='static'):
                 for j in range(i,n):
-                    if  n_nodes[i] > 0 and n_nodes[j] > 0  and selected_test[i] == True:
+                    if  n_nodes[i] > 0 and n_nodes[j] > 0  and selected_test[i] == 1:
                         with gil:
                             comparison_matrix[i, j] = self.bp2(new_gs[i], new_gs[j])
                     else:
                         comparison_matrix[i, j] = 0
                     comparison_matrix[j, i] = comparison_matrix[i, j]
 
-        return comparison_matrix
+        return np.array(comparison_matrix)
 
 
     cdef double bp2(self, g1, g2):
@@ -148,18 +148,18 @@ cdef class BP_2(Base):
         :return:
         """
         cdef np.ndarray min_sum = np.zeros(g1.size())
-        nodes1 = list(g1.nodes())
-        nodes2 = list(g2.nodes())
+        cdef list nodes1 = list(g1.nodes())
+        cdef list nodes2 = list(g2.nodes())
         nodes2.extend([None])
         cdef np.ndarray min_i
-        for i in range(len(nodes1)):
-            min_i = np.zeros(len(nodes2))
-            for j in range(len(nodes2)):
+        for i in range(g1.size()):
+            min_i = np.zeros(g2.size())
+            for j in range(g2.size()):
                 min_i[j] = self.fuv(g1, g2, nodes1[i], nodes2[j])
             min_sum[i] = np.min(min_i)
         return np.sum(min_sum)
 
-    cdef float fuv(self, g1, g2, n1, n2):
+    cdef float fuv(self, g1, g2, str n1, str n2):
         """
         Compute the Node Distance function
         :param g1: first graph
@@ -177,7 +177,7 @@ cdef class BP_2(Base):
                 return 0
             return (self.node_del + self.node_ins + self.hed_edge(g1, g2, n1, n2)) / 2
 
-    cdef float hed_edge(self, g1, g2, n1, n2):
+    cdef float hed_edge(self, g1, g2, str n1, str n2):
         """
         Compute HEDistance between edges of n1 and n2, respectively in g1 and g2
         :param g1: first graph
@@ -189,7 +189,7 @@ cdef class BP_2(Base):
         return self.sum_gpq(g1, n1, g2, n2) + self.sum_gpq(g1, n1, g2, n2)
 
 
-    cdef float sum_gpq(self, g1, n1, g2, n2):
+    cdef float sum_gpq(self, g1, str n1, g2, str n2):
         """
         Compute Nearest Neighbour Distance between edges around n1 in G1  and edges around n2 in G2
         :param g1: first graph
@@ -213,7 +213,7 @@ cdef class BP_2(Base):
             min_sum[i] = np.min(min_i)
         return np.sum(min_sum)
 
-    cdef float gpq(self, tuple e1, tuple e2):
+    cdef float gpq(self, str e1, str e2):
         """
         Compute the edge distance function
         :param e1: edge1

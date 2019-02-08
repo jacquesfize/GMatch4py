@@ -5,7 +5,7 @@ cimport numpy as np
 from .base cimport Base,intersection
 from .graph cimport Graph
 from cython.parallel cimport prange,parallel
-from ..helpers.general import parsenx2graph
+from .helpers.general import parsenx2graph
 
 cdef class VertexEdgeOverlap(Base):
 
@@ -47,7 +47,7 @@ cdef class VertexEdgeOverlap(Base):
         cdef long[:] n_nodes = np.array([g.size() for g in new_gs])
         cdef long[:] n_edges = np.array([g.density() for g in new_gs])
 
-        cdef bint[:] selected_test = self.get_selected_array(selected,n)
+        cdef double[:] selected_test = np.array(self.get_selected_array(selected,n))
 
         cdef double[:,:] intersect_len_nodes = np.zeros((n, n))
         cdef double[:,:] intersect_len_edges = np.zeros((n, n))
@@ -56,10 +56,10 @@ cdef class VertexEdgeOverlap(Base):
                 intersect_len_nodes[i][j]=new_gs[i].size_node_intersect(new_gs[j])
                 intersect_len_edges[i][j]=new_gs[i].size_edge_intersect(new_gs[j])#len(set(hash_edges[i]).intersection(hash_edges[j]))
                 
-        with nogil, parallel(num_threads=4):
+        with nogil, parallel(num_threads=self.cpu_count):
             for i in prange(n,schedule='static'):
                 for j in range(i,n):
-                    if  n_nodes[i] > 0 and n_nodes[j] > 0  and selected_test[i] == True:
+                    if  n_nodes[i] > 0 and n_nodes[j] > 0  and selected_test[i] == 1:
                         denom=n_nodes[i]+n_nodes[j]+\
                               n_edges[i]+n_edges[j]
                         if denom == 0:

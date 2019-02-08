@@ -3,6 +3,10 @@
 import numpy as np
 cimport numpy as np
 import networkx as nx
+cimport cython
+import multiprocessing
+
+
 
 cpdef np.ndarray minmax_scale(np.ndarray matrix):
     """
@@ -136,17 +140,22 @@ cdef class Base:
         else:
             self.type_alg=type_alg
         self.normalized=normalized
+        self.cpu_count=multiprocessing.cpu_count()
 
-    cpdef list get_selected_array(self,selected,size_corpus):
-        cdef list selected_test = [True]*size_corpus
-        if selected:
-            selected_test = [False]*size_corpus
+    cpdef np.ndarray get_selected_array(self,selected,size_corpus):
+        cdef double[:] selected_test = np.zeros(size_corpus)
+        if not selected == None:
             for ix in range(len(selected)):
-                selected_test[ix]=True
-        return selected
+                selected_test[selected[ix]]=1
+            return np.array(selected_test)
+        else:
+            return np.array(selected_test)+1
+        
 
     cpdef np.ndarray compare_old(self,list listgs, list selected):
         pass
+
+    @cython.boundscheck(False) 
     cpdef np.ndarray compare(self,list graph_list, list selected):
         """
         Return the similarity/distance matrix using the current algorithm.

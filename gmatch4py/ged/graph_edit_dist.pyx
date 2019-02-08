@@ -7,7 +7,6 @@ import numpy as np
 cimport numpy as np
 from .abstract_graph_edit_dist cimport AbstractGraphEditDistance
 from ..base cimport intersection,union_
-from ..graph cimport Graph
 
 
 cdef class GraphEditDistance(AbstractGraphEditDistance):

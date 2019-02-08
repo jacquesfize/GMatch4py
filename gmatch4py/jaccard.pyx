@@ -5,7 +5,7 @@ cimport numpy as np
 
 from .base cimport Base
 from .base cimport intersection,union_
-from ..helpers.general import parsenx2graph
+from .helpers.general import parsenx2graph
 from cython.parallel cimport prange,parallel
 
 cdef class Jaccard(Base):
@@ -47,7 +47,7 @@ cdef class Jaccard(Base):
         cdef long[:] n_edges = np.array([g.density() for g in new_gs])
         cdef int i,j
 
-        cdef bint[:] selected_test = self.get_selected_array(selected,n)
+        cdef double[:] selected_test = np.array(self.get_selected_array(selected,n))
 
         cdef double[:,:] intersect_len_nodes = np.zeros((n, n))
         cdef double[:,:] intersect_len_edges = np.zeros((n, n))
@@ -59,10 +59,10 @@ cdef class Jaccard(Base):
                 intersect_len_edges[i][j]=new_gs[i].size_edge_intersect(new_gs[j])#len(set(hash_edges[i]).intersection(hash_edges[j]))
                 union_len_nodes[i][j]=new_gs[i].size_node_union(new_gs[j])
                 union_len_edges[i][j]=new_gs[i].size_node_union(new_gs[j])
-        with nogil, parallel(num_threads=4):
+        with nogil, parallel(num_threads=self.cpu_count):
             for i in prange(n,schedule='static'):
                 for j in range(i,n):
-                    if  n_nodes[i] > 0 and n_nodes[j] > 0  and selected_test[i]:
+                    if  n_nodes[i] > 0 and n_nodes[j] > 0  and selected_test[i] == 1:
                         if union_len_edges[i][j] >0 and union_len_nodes[i][j] >0:
                             comparison_matrix[i][j]= \
                                 (intersect_len_edges[i][j]/union_len_edges[i][j])*\

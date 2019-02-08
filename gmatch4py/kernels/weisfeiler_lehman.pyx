@@ -105,7 +105,6 @@ cdef class WeisfeleirLehmanKernel(Base):
 
         # cdef np.ndarray[np.float64_t] k
         k = np.dot(phi.transpose(), phi)
-        print(1)
         # MAIN LOOP
         cdef int it = 0
 

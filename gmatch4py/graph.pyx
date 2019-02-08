@@ -207,6 +207,7 @@ cdef class Graph:
             return [(e1,e2,self.edges_attr_list[self.edges_hash_idx[hash_]])for hash_ in hashes]
         else:
             return [(e1,e2,None)]
+            
     cpdef list get_edges_no(self,str n):
         return self.edges_of_nodes[n]
 
