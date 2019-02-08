@@ -114,7 +114,7 @@ each code is associated with a reference to the original.**
 GMatch4py is going through some heavy changes to diminish the time execution of each algorithm. You may found an alpha version available in the branch `graph_cython`.
 
 As of today, the results are promising (up to ![](https://latex.codecogs.com/gif.latex?%5Ctimes)36 for Jaccard)
-![](https://i.ibb.co/r7BWcxy/multiplicator.png)
+![](https://i.ibb.co/qMZRHhN/multiplicator-2.png)
 ## TODO List
 
   * Debug algorithms --> :runner: (almost done !)
