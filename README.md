@@ -109,6 +109,12 @@ Jacques Fize, *jacques[dot]fize[at]cirad[dot]fr*
 Some algorithms from other projects were integrated to Gmatch4py. **Be assured that
 each code is associated with a reference to the original.**
 
+## Improvements
+
+GMatch4py is going through some heavy changes to diminish the time execution of each algorithm. You may found an alpha version available in the branch `graph_cython`.
+
+As of today, the results are promising (up to ![](https://latex.codecogs.com/gif.latex?%5Ctimes)36 for Jaccard)
+![](https://i.ibb.co/ZX62gYb/mutliplicator.png)
 ## TODO List
 
   * Debug algorithms --> :runner: (almost done !)
