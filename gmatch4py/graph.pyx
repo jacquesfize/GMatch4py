@@ -124,7 +124,6 @@ cdef class Graph:
 
         self.edges_weight={}
         for e1,e2,attr_dict in list(G.edges(data=True)):
-            print(e1,e2,attr_dict)
             hash_=self.hash_edge_attr(e1,e2,attr_dict[self.edge_attr_key]) if self.is_edge_attr else self.hash_edge(e1,e2)
             self.edges_weight[hash_]=attr_dict["weight"] if "weight" in attr_dict else 1 
         
