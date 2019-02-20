@@ -39,7 +39,7 @@ cdef class Graph:
             self.edge_attr_key = edge_attr_key
             self.edges_attr_list = [attr_dict[edge_attr_key] for attr_dict in self.attr_edges]
             self.unique_edge_attr_vals=set(self.edges_attr_list)
-        
+
         # NODE Information init
         #######################
         
@@ -57,7 +57,6 @@ cdef class Graph:
         if self.is_edge_attr:
             self.degree_per_attr={attr_v:{n:{"in":0,"out":0} for n in self.nodes_list} for attr_v in self.unique_edge_attr_vals}
             self.degree_per_attr_weighted={attr_v:{n:{"in":0,"out":0} for n in self.nodes_list} for attr_v in self.unique_edge_attr_vals}
-            
         # Retrieving Degree Information
         self.edges_of_nodes={}
         for n in self.nodes_list:
@@ -114,7 +113,7 @@ cdef class Graph:
             if not e1 in self.edges_hash_map:self.edges_hash_map[e1]={}
             
             hash_=self.hash_edge_attr(e1,e2,self.edges_attr_list[ix]) if self.is_edge_attr else self.hash_edge(e1,e2)
-            if self.is_multi:
+            if self.is_multi and self.is_edge_attr:
                 if not e2 in self.edges_hash_map[e1]:self.edges_hash_map[e1][e2]={}
                 self.edges_hash_map[e1][e2][self.edges_attr_list[ix]]=hash_
             else:
@@ -122,9 +121,10 @@ cdef class Graph:
             self.edges_hash_idx[hash_]=ix 
             self.edges_hash.append(hash_) 
         self.edges_hash_set=set(self.edges_hash)
-        
+
         self.edges_weight={}
         for e1,e2,attr_dict in list(G.edges(data=True)):
+            print(e1,e2,attr_dict)
             hash_=self.hash_edge_attr(e1,e2,attr_dict[self.edge_attr_key]) if self.is_edge_attr else self.hash_edge(e1,e2)
             self.edges_weight[hash_]=attr_dict["weight"] if "weight" in attr_dict else 1 
         
