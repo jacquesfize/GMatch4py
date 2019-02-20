@@ -25,7 +25,7 @@ cdef class Graph:
             self.number_of_nodes = 0
 
             self.number_of_edges = 0
-            self.edge_list=[]
+            self.edges_list=[]
             self.edges_attr_list =[]
             self.edges_hash_idx = {}
             self.edges_hash = []
