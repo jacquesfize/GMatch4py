@@ -22,6 +22,18 @@ cdef class Graph:
             self.nodes_degree,self.nodes_degree_in,self.nodes_degree_out,self.nodes_degree_weighted,self.nodes_degree_in_weighted,self.nodes_degree_out_weighted=np.array([],dtype=np.long),np.array([],dtype=np.long),np.array([],dtype=np.long),np.array([],dtype=np.long),np.array([],dtype=np.long),np.array([],dtype=np.long)
             self.nodes_idx,self.degree_per_attr,self.degree_per_attr_weighted={},{},{}
             self.nodes_hash_set=set([])
+            self.number_of_nodes = 0
+
+            self.number_of_edges = 0
+            self.edge_list=[]
+            self.edges_attr_list =[]
+            self.edges_hash_idx = {}
+            self.edges_hash = []
+            self.edges_hash_set= set([])
+            self.edges_weight={}
+            self.edges_hash_map={}
+            self.attr_edges={}
+
 
         else:
             a,b=list(zip(*list(G.nodes(data=True))))
@@ -165,6 +177,8 @@ cdef class Graph:
         return False
 
     cpdef bint has_edge(self,str n_id1,str n_id2):
+        if self.number_of_edges == 0:
+            return False
         if self.is_directed:
             if n_id1 in self.edges_hash_map and n_id2 in self.edges_hash_map[n_id1]:
                 return True
@@ -177,11 +191,15 @@ cdef class Graph:
 
     ## LEN FUNCTION
     cpdef int size_node_intersect(self,Graph G):
+        if self.number_of_nodes == 0:
+            return 0
         return len(self.nodes_hash_set.intersection(G.nodes_hash_set))
     cpdef int size_node_union(self,Graph G):
         return len(self.nodes_hash_set.union(G.nodes_hash_set))
     
     cpdef int size_edge_intersect(self,Graph G):
+        if self.number_of_edges == 0:
+            return 0
         return len(self.edges_hash_set.intersection(G.edges_hash_set))
     cpdef int size_edge_union(self,Graph G):
         return len(self.edges_hash_set.union(G.edges_hash_set))
@@ -193,23 +211,31 @@ cdef class Graph:
 
     def nodes(self,data=False):
         if data:
+            if self.number_of_nodes == 0:
+                    return [],[]
             return self.nodes_list,self.attr_nodes
-        else:
-            return self.nodes_list
+        
+        if self.number_of_nodes == 0:
+                return []
+        return self.nodes_list
         
     
     def edges(self,data=False):
         if data:
+            if self.number_of_edges == 0:
+                    return [],[]
             return self.edges_list,self.attr_edges
-        else:
-            return self.edges_list
+        
+        if self.number_of_edges == 0:
+            return []
+        return self.edges_list
     
     cpdef list get_edges_ed(self,str e1,str e2):
         if self.is_edge_attr:
             hashes=self.edges_hash_map[e1][e2]
             return [(e1,e2,self.edges_attr_list[self.edges_hash_idx[hash_]])for hash_ in hashes]
-        else:
-            return [(e1,e2,None)]
+        
+        return [(e1,e2,None)]
             
     cpdef list get_edges_no(self,str n):
         return self.edges_of_nodes[n]
