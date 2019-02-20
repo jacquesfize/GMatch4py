@@ -32,7 +32,7 @@ cdef class Graph:
             self.edges_hash_set= set([])
             self.edges_weight={}
             self.edges_hash_map={}
-            self.attr_edges={}
+            self.attr_edges=[]
 
 
         else:
