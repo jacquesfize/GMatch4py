@@ -17,128 +17,132 @@ cdef class Graph:
         self.is_node_attr=(True if node_attr_key else False)
         self.is_edge_attr=(True if edge_attr_key else False)
         
-        if len(G) == 0:
-            return
-        
-        a,b=list(zip(*list(G.nodes(data=True))))
-        self.nodes_list,self.attr_nodes=list(a),list(b)
-        if G.number_of_edges()>0:
-            e1,e2,d=zip(*list(G.edges(data=True)))
-            self.attr_edges=list(d)
-            self.edges_list=list(zip(e1,e2))
+        if len(G) ==0:
+            self.nodes_list,self.nodes_attr_list,self.nodes_hash,self.nodes_weight,self.attr_nodes=[],[],[],[],[]
+            self.nodes_degree,self.nodes_degree_in,self.nodes_degree_out,self.nodes_degree_weighted,self.nodes_degree_in_weighted,self.nodes_degree_out_weighted=np.array([],dtype=np.long),np.array([],dtype=np.long),np.array([],dtype=np.long),np.array([],dtype=np.long),np.array([],dtype=np.long),np.array([],dtype=np.long)
+            self.nodes_idx,self.degree_per_attr,self.degree_per_attr_weighted={},{},{}
+            self.nodes_hash_set=set([])
+
         else:
-            self.edges_list=[]
-            self.attr_edges=[]
-
-        if self.is_node_attr:
-            self.node_attr_key = node_attr_key
-            self.nodes_attr_list = [attr_dict[node_attr_key] for attr_dict in self.attr_nodes]
-            self.unique_node_attr_vals=set(self.nodes_attr_list)
-        
-        if self.is_edge_attr:
-            self.edge_attr_key = edge_attr_key
-            self.edges_attr_list = [attr_dict[edge_attr_key] for attr_dict in self.attr_edges]
-            self.unique_edge_attr_vals=set(self.edges_attr_list)
-
-        # NODE Information init
-        #######################
-        
-        self.nodes_hash=[self.hash_node_attr(node,self.nodes_attr_list[ix]) if self.is_node_attr else self.hash_node(node) for ix, node in enumerate(self.nodes_list) ]
-        self.nodes_hash_set=set(self.nodes_hash)
-        self.nodes_idx={node:ix for ix, node in enumerate(self.nodes_list)}
-        self.nodes_weight=[attr_dict["weight"] if "weight" in attr_dict else 1 for attr_dict in self.attr_nodes]
-        degree_all=[]
-        degree_in=[]
-        degree_out=[]
-
-        degree_all_weighted=[]
-        degree_in_weighted=[]
-        degree_out_weighted=[]
-        if self.is_edge_attr:
-            self.degree_per_attr={attr_v:{n:{"in":0,"out":0} for n in self.nodes_list} for attr_v in self.unique_edge_attr_vals}
-            self.degree_per_attr_weighted={attr_v:{n:{"in":0,"out":0} for n in self.nodes_list} for attr_v in self.unique_edge_attr_vals}
-        # Retrieving Degree Information
-        self.edges_of_nodes={}
-        for n in self.nodes_list:
-            self.edges_of_nodes[n]=[self.hash_edge_attr(e1,e2,attr_dict[self.edge_attr_key]) if self.is_edge_attr else self.hash_edge(e1,e2) for e1,e2,attr_dict in G.edges(n,data=True)]
-            degree_all.append(G.degree(n))
-            degree_all_weighted.append(G.degree(n,weight="weight"))
-            if self.is_directed:
-                degree_in.append(G.in_degree(n))
-                degree_in_weighted.append(G.in_degree(n,weight="weight"))
-                degree_out.append(G.out_degree(n))
-                degree_out_weighted.append(G.out_degree(n))
+            a,b=list(zip(*list(G.nodes(data=True))))
+            self.nodes_list,self.attr_nodes=list(a),list(b)
+            if G.number_of_edges()>0:
+                e1,e2,d=zip(*list(G.edges(data=True)))
+                self.attr_edges=list(d)
+                self.edges_list=list(zip(e1,e2))
             else:
-                degree_in.append(degree_all[-1])
-                degree_in_weighted.append(degree_all_weighted[-1])
-                degree_out.append(degree_all[-1])
-                degree_out_weighted.append(degree_all_weighted[-1])
-            if self.is_edge_attr:
-                if self.is_directed:
-                    in_edge=list(G.in_edges(n,data=True))
-                    out_edge=list(G.in_edges(n,data=True))
-                    for n1,n2,attr_dict in in_edge:
-                        self.degree_per_attr[attr_dict[self.edge_attr_key]][n]["in"]+=1
-                        self.degree_per_attr_weighted[attr_dict[self.edge_attr_key]][n]["in"]+=1*(attr_dict["weight"] if "weight" in attr_dict else 1 )
-        
-                    for n1,n2,attr_dict in out_edge:
-                        self.degree_per_attr[attr_dict[self.edge_attr_key]][n]["out"]+=1
-                        self.degree_per_attr_weighted[attr_dict[self.edge_attr_key]][n]["out"]+=1*(attr_dict["weight"] if "weight" in attr_dict else 1 )
-    
-                else:
-                    edges=G.edges(n,data=True)
-                    for n1,n2,attr_dict in edges:
-                        self.degree_per_attr[attr_dict[self.edge_attr_key]][n]["in"]+=1
-                        self.degree_per_attr[attr_dict[self.edge_attr_key]][n]["out"]+=1
-                        self.degree_per_attr_weighted[attr_dict[self.edge_attr_key]][n]["in"]+=1*(attr_dict["weight"] if "weight" in attr_dict else 1 )
-                        self.degree_per_attr_weighted[attr_dict[self.edge_attr_key]][n]["out"]+=1*(attr_dict["weight"] if "weight" in attr_dict else 1 )
-        
-        
-        self.nodes_degree=np.array(degree_all)
-        self.nodes_degree_in=np.array(degree_in)
-        self.nodes_degree_out=np.array(degree_out)
+                self.edges_list=[]
+                self.attr_edges=[]
 
-        self.nodes_degree_weighted=np.array(degree_all_weighted)
-        self.nodes_degree_in_weighted=np.array(degree_in_weighted)
-        self.nodes_degree_out_weighted=np.array(degree_out_weighted)
-
-        # EDGE INFO INIT
-        #################
-        
-        self.edges_hash=[]
-        self.edges_hash_map = {}
-        self.edges_hash_idx = {}
-        for ix, ed in enumerate(self.edges_list):
-            e1,e2=ed
-            if not e1 in self.edges_hash_map:self.edges_hash_map[e1]={}
+            if self.is_node_attr:
+                self.node_attr_key = node_attr_key
+                self.nodes_attr_list = [attr_dict[node_attr_key] for attr_dict in self.attr_nodes]
+                self.unique_node_attr_vals=set(self.nodes_attr_list)
             
-            hash_=self.hash_edge_attr(e1,e2,self.edges_attr_list[ix]) if self.is_edge_attr else self.hash_edge(e1,e2)
-            if self.is_multi and self.is_edge_attr:
-                if not e2 in self.edges_hash_map[e1]:self.edges_hash_map[e1][e2]={}
-                self.edges_hash_map[e1][e2][self.edges_attr_list[ix]]=hash_
-            else:
-                self.edges_hash_map[e1][e2]=hash_
-            self.edges_hash_idx[hash_]=ix 
-            self.edges_hash.append(hash_) 
-        self.edges_hash_set=set(self.edges_hash)
+            if self.is_edge_attr:
+                self.edge_attr_key = edge_attr_key
+                self.edges_attr_list = [attr_dict[edge_attr_key] for attr_dict in self.attr_edges]
+                self.unique_edge_attr_vals=set(self.edges_attr_list)
 
-        self.edges_weight={}
-        for e1,e2,attr_dict in list(G.edges(data=True)):
-            hash_=self.hash_edge_attr(e1,e2,attr_dict[self.edge_attr_key]) if self.is_edge_attr else self.hash_edge(e1,e2)
-            self.edges_weight[hash_]=attr_dict["weight"] if "weight" in attr_dict else 1 
+            # NODE Information init
+            #######################
+            
+            self.nodes_hash=[self.hash_node_attr(node,self.nodes_attr_list[ix]) if self.is_node_attr else self.hash_node(node) for ix, node in enumerate(self.nodes_list) ]
+            self.nodes_hash_set=set(self.nodes_hash)
+            self.nodes_idx={node:ix for ix, node in enumerate(self.nodes_list)}
+            self.nodes_weight=[attr_dict["weight"] if "weight" in attr_dict else 1 for attr_dict in self.attr_nodes]
+            degree_all=[]
+            degree_in=[]
+            degree_out=[]
+
+            degree_all_weighted=[]
+            degree_in_weighted=[]
+            degree_out_weighted=[]
+            if self.is_edge_attr:
+                self.degree_per_attr={attr_v:{n:{"in":0,"out":0} for n in self.nodes_list} for attr_v in self.unique_edge_attr_vals}
+                self.degree_per_attr_weighted={attr_v:{n:{"in":0,"out":0} for n in self.nodes_list} for attr_v in self.unique_edge_attr_vals}
+            # Retrieving Degree Information
+            self.edges_of_nodes={}
+            for n in self.nodes_list:
+                self.edges_of_nodes[n]=[self.hash_edge_attr(e1,e2,attr_dict[self.edge_attr_key]) if self.is_edge_attr else self.hash_edge(e1,e2) for e1,e2,attr_dict in G.edges(n,data=True)]
+                degree_all.append(G.degree(n))
+                degree_all_weighted.append(G.degree(n,weight="weight"))
+                if self.is_directed:
+                    degree_in.append(G.in_degree(n))
+                    degree_in_weighted.append(G.in_degree(n,weight="weight"))
+                    degree_out.append(G.out_degree(n))
+                    degree_out_weighted.append(G.out_degree(n))
+                else:
+                    degree_in.append(degree_all[-1])
+                    degree_in_weighted.append(degree_all_weighted[-1])
+                    degree_out.append(degree_all[-1])
+                    degree_out_weighted.append(degree_all_weighted[-1])
+                if self.is_edge_attr:
+                    if self.is_directed:
+                        in_edge=list(G.in_edges(n,data=True))
+                        out_edge=list(G.in_edges(n,data=True))
+                        for n1,n2,attr_dict in in_edge:
+                            self.degree_per_attr[attr_dict[self.edge_attr_key]][n]["in"]+=1
+                            self.degree_per_attr_weighted[attr_dict[self.edge_attr_key]][n]["in"]+=1*(attr_dict["weight"] if "weight" in attr_dict else 1 )
+            
+                        for n1,n2,attr_dict in out_edge:
+                            self.degree_per_attr[attr_dict[self.edge_attr_key]][n]["out"]+=1
+                            self.degree_per_attr_weighted[attr_dict[self.edge_attr_key]][n]["out"]+=1*(attr_dict["weight"] if "weight" in attr_dict else 1 )
         
-        self.number_of_edges = len(self.edges_list)
-        self.number_of_nodes = len(self.nodes_list)
-        
-        if self.is_edge_attr and self.number_of_edges >0:
-            self.number_of_edges_per_attr={attr:0 for attr in self.unique_edge_attr_vals}
-            for _,_,attr_dict in list(G.edges(data=True)):
-                self.number_of_edges_per_attr[attr_dict[self.edge_attr_key]]+=1
-        
-        if self.is_node_attr and self.number_of_nodes >0:
-            self.number_of_nodes_per_attr={attr:0 for attr in self.unique_node_attr_vals}
-            for _,attr_dict in list(G.nodes(data=True)):
-                self.number_of_nodes_per_attr[attr_dict[self.node_attr_key]]+=1
+                    else:
+                        edges=G.edges(n,data=True)
+                        for n1,n2,attr_dict in edges:
+                            self.degree_per_attr[attr_dict[self.edge_attr_key]][n]["in"]+=1
+                            self.degree_per_attr[attr_dict[self.edge_attr_key]][n]["out"]+=1
+                            self.degree_per_attr_weighted[attr_dict[self.edge_attr_key]][n]["in"]+=1*(attr_dict["weight"] if "weight" in attr_dict else 1 )
+                            self.degree_per_attr_weighted[attr_dict[self.edge_attr_key]][n]["out"]+=1*(attr_dict["weight"] if "weight" in attr_dict else 1 )
+            
+            
+            self.nodes_degree=np.array(degree_all)
+            self.nodes_degree_in=np.array(degree_in)
+            self.nodes_degree_out=np.array(degree_out)
+
+            self.nodes_degree_weighted=np.array(degree_all_weighted)
+            self.nodes_degree_in_weighted=np.array(degree_in_weighted)
+            self.nodes_degree_out_weighted=np.array(degree_out_weighted)
+
+            # EDGE INFO INIT
+            #################
+            
+            self.edges_hash=[]
+            self.edges_hash_map = {}
+            self.edges_hash_idx = {}
+            for ix, ed in enumerate(self.edges_list):
+                e1,e2=ed
+                if not e1 in self.edges_hash_map:self.edges_hash_map[e1]={}
+                
+                hash_=self.hash_edge_attr(e1,e2,self.edges_attr_list[ix]) if self.is_edge_attr else self.hash_edge(e1,e2)
+                if self.is_multi and self.is_edge_attr:
+                    if not e2 in self.edges_hash_map[e1]:self.edges_hash_map[e1][e2]={}
+                    self.edges_hash_map[e1][e2][self.edges_attr_list[ix]]=hash_
+                else:
+                    self.edges_hash_map[e1][e2]=hash_
+                self.edges_hash_idx[hash_]=ix 
+                self.edges_hash.append(hash_) 
+            self.edges_hash_set=set(self.edges_hash)
+
+            self.edges_weight={}
+            for e1,e2,attr_dict in list(G.edges(data=True)):
+                hash_=self.hash_edge_attr(e1,e2,attr_dict[self.edge_attr_key]) if self.is_edge_attr else self.hash_edge(e1,e2)
+                self.edges_weight[hash_]=attr_dict["weight"] if "weight" in attr_dict else 1 
+            
+            self.number_of_edges = len(self.edges_list)
+            self.number_of_nodes = len(self.nodes_list)
+            
+            if self.is_edge_attr and self.number_of_edges >0:
+                self.number_of_edges_per_attr={attr:0 for attr in self.unique_edge_attr_vals}
+                for _,_,attr_dict in list(G.edges(data=True)):
+                    self.number_of_edges_per_attr[attr_dict[self.edge_attr_key]]+=1
+            
+            if self.is_node_attr and self.number_of_nodes >0:
+                self.number_of_nodes_per_attr={attr:0 for attr in self.unique_node_attr_vals}
+                for _,attr_dict in list(G.nodes(data=True)):
+                    self.number_of_nodes_per_attr[attr_dict[self.node_attr_key]]+=1
 
     
     # HASH FUNCTION

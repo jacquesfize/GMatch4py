@@ -78,7 +78,7 @@ setup(
         ]
 )
 #Clean cpp and compiled file
-f=True
+f=False
 if f:
     if os.path.exists("build"):
         shutil.rmtree("build")
