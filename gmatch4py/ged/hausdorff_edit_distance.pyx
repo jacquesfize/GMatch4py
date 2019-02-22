@@ -47,7 +47,7 @@ cdef class HED(Base):
     
     cpdef np.ndarray compare(self,list listgs, list selected):
         cdef int n = len(listgs)
-        cdef list new_gs=parsenx2graph(listgs)
+        cdef list new_gs=parsenx2graph(listgs,self.node_attr_key,self.edge_attr_key)
         cdef double[:,:] comparison_matrix = np.zeros((n, n))
         cdef double[:] selected_test = np.array(self.get_selected_array(selected,n))
         cdef int i,j

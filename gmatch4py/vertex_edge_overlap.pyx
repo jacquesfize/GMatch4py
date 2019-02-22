@@ -41,7 +41,7 @@ cdef class VertexEdgeOverlap(Base):
 
     cpdef np.ndarray compare(self,list listgs, list selected):
         cdef int n = len(listgs)
-        cdef list new_gs=parsenx2graph(listgs)
+        cdef list new_gs=parsenx2graph(listgs,self.node_attr_key,self.edge_attr_key)
         cdef double[:,:] comparison_matrix = np.zeros((n, n))
         cdef int denom,i,j
         cdef long[:] n_nodes = np.array([g.size() for g in new_gs])
@@ -62,12 +62,12 @@ cdef class VertexEdgeOverlap(Base):
                     if  n_nodes[i] > 0 and n_nodes[j] > 0  and selected_test[i] == 1:
                         denom=n_nodes[i]+n_nodes[j]+\
                               n_edges[i]+n_edges[j]
-                        if denom == 0:
-                            continue
-                        comparison_matrix[i][j]=(2*(intersect_len_nodes[i][j]
+                        if  denom > 0:
+                            comparison_matrix[i][j]=(2*(intersect_len_nodes[i][j]
                                                   +intersect_len_edges[i][j]))/denom # Data = True --> For nx.MultiDiGraph
-
-                    comparison_matrix[i][j] = comparison_matrix[i][j]
+                        if i==j:
+                            comparison_matrix[i][j]=1
+                        comparison_matrix[j][i] = comparison_matrix[i][j]
         return np.array(comparison_matrix)
 
 

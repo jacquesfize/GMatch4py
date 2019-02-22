@@ -32,7 +32,7 @@ cdef class MCS(Base):
         cdef int n = len(listgs)
         cdef double [:,:] comparison_matrix = np.zeros((n, n))
         cdef double[:] selected_test = np.array(self.get_selected_array(selected,n))
-        cdef list new_gs=parsenx2graph(listgs)
+        cdef list new_gs=parsenx2graph(listgs,self.node_attr_key,self.edge_attr_key)
         cdef long[:] n_nodes = np.array([g.size() for g in new_gs])
         cdef double [:,:] intersect_len_nodes = np.zeros((n, n))
         cdef int i,j
@@ -47,7 +47,11 @@ cdef class MCS(Base):
                         comparison_matrix[i][j] = intersect_len_nodes[i][j]/max(n_nodes[i],n_nodes[j])
                     else:
                         comparison_matrix[i][j] = 0.
+                    if i==j:
+                        comparison_matrix[i][j]=1
                     comparison_matrix[j][i] = comparison_matrix[i][j]
+
+        
         return np.array(comparison_matrix)
 
     def s_mcs(self,G, H):

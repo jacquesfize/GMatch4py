@@ -119,7 +119,7 @@ cdef class Base:
         self.type_alg=0
         self.normalized=False
 
-    def __init__(self,type_alg,normalized):
+    def __init__(self,type_alg,normalized,node_attr_key="",edge_attr_key=""):
         """
         Constructor of Base
 
@@ -141,7 +141,13 @@ cdef class Base:
             self.type_alg=type_alg
         self.normalized=normalized
         self.cpu_count=multiprocessing.cpu_count()
+        self.node_attr_key=node_attr_key
+        self.edge_attr_key=edge_attr_key
 
+    cpdef set_attr_graph_used(self, str node_attr_key, str edge_attr_key):
+        self.node_attr_key=node_attr_key
+        self.edge_attr_key=edge_attr_key
+    
     cpdef np.ndarray get_selected_array(self,selected,size_corpus):
         cdef double[:] selected_test = np.zeros(size_corpus)
         if not selected == None:

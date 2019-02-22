@@ -41,7 +41,7 @@ cdef class Jaccard(Base):
 
     cpdef np.ndarray compare(self,list listgs, list selected):
         cdef int n = len(listgs)
-        cdef list new_gs=parsenx2graph(listgs)
+        cdef list new_gs=parsenx2graph(listgs,self.node_attr_key,self.edge_attr_key)
         cdef double[:,:] comparison_matrix = np.zeros((n, n))
         cdef long[:] n_nodes = np.array([g.size() for g in new_gs])
         cdef long[:] n_edges = np.array([g.density() for g in new_gs])
@@ -71,6 +71,6 @@ cdef class Jaccard(Base):
                         else:
                             comparison_matrix[i][j] = 0.
 
-                    comparison_matrix[j][i] = comparison_matrix[i][j]
+                        comparison_matrix[j][i] = comparison_matrix[i][j]
 
         return np.array(comparison_matrix)
