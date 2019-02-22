@@ -70,7 +70,7 @@ setup(
     cmdclass={'build_ext': build_ext},
     setup_requires=["numpy","networkx","scipy",'scikit-learn'],
     install_requires=["numpy","networkx","scipy",'scikit-learn'],
-    version="0.2.4alpha",
+    version="0.2.4.2beta",
     classifiers=[
             "Programming Language :: Python :: 3",
             "License :: OSI Approved :: MIT License",

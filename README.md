@@ -84,7 +84,6 @@ ged.distance(result)
     * Shortest Path Kernel [3]
     * Weisfeiler-Lehman Kernel [4]
         * Subtree Kernel 
-        * Edge Kernel
  * Graph Edit Distance [5]
     * Approximated Graph Edit Distance 
     * Hausdorff Graph Edit Distance 
