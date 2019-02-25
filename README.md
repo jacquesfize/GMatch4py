@@ -19,7 +19,7 @@ To install `GMatch4py`, run the following commands:
 ```bash
 git clone https://github.com/Jacobe2169/GMatch4py.git
 cd GMatch4py
-(sudo) python3 setup.py install
+(sudo) pip(3) install .
 ```
 
 ## Get Started
@@ -108,7 +108,13 @@ Jacques Fize, *jacques[dot]fize[at]cirad[dot]fr*
 Some algorithms from other projects were integrated to Gmatch4py. **Be assured that
 each code is associated with a reference to the original.**
 
+## CHANGELOG
+### 25.02.2019
+ * Add New Graph Class. Features : Cython Extensions, precomputed values (degrees, neighbor info), hash representation of edges and nodes for a faster comparison
+ * Some algorithms are parallelized such as graph edit distances or Jaccard
+
 ## TODO List
 
-  * Debug algorithms --> :runner: (almost done !)
+  * Debug algorithms --> Random Walk Kernel
+  * Optimize algorithms --> Vertex Ranking
   * Write the documentation :runner:

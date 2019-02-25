@@ -8,7 +8,7 @@ from .ged.hausdorff_edit_distance import *
 
 # Kernels algorithms import
 from .kernels.weisfeiler_lehman import *
-
+from .kernels.shortest_path_kernel import *
 # Helpers import
 from .helpers.reader import *
 

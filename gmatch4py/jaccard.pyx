@@ -7,6 +7,7 @@ from .base cimport Base
 from .base cimport intersection,union_
 from .helpers.general import parsenx2graph
 from cython.parallel cimport prange,parallel
+cimport cython
 
 cdef class Jaccard(Base):
 
@@ -39,6 +40,7 @@ cdef class Jaccard(Base):
 
         return comparison_matrix
 
+    @cython.boundscheck(False)
     cpdef np.ndarray compare(self,list listgs, list selected):
         cdef int n = len(listgs)
         cdef list new_gs=parsenx2graph(listgs,self.node_attr_key,self.edge_attr_key)
@@ -58,7 +60,7 @@ cdef class Jaccard(Base):
                 intersect_len_nodes[i][j]=new_gs[i].size_node_intersect(new_gs[j])
                 intersect_len_edges[i][j]=new_gs[i].size_edge_intersect(new_gs[j])#len(set(hash_edges[i]).intersection(hash_edges[j]))
                 union_len_nodes[i][j]=new_gs[i].size_node_union(new_gs[j])
-                union_len_edges[i][j]=new_gs[i].size_node_union(new_gs[j])
+                union_len_edges[i][j]=new_gs[i].size_edge_union(new_gs[j])
         with nogil, parallel(num_threads=self.cpu_count):
             for i in prange(n,schedule='static'):
                 for j in range(i,n):

@@ -18,6 +18,7 @@ from .adjacency import get_adjacency
 from cython.parallel cimport prange,parallel
 from ..helpers.general import parsenx2graph
 from ..base cimport Base
+cimport cython
 
 cdef class ShortestPathGraphKernel(Base):
     """
@@ -65,7 +66,7 @@ cdef class ShortestPathGraphKernel(Base):
 
         return np.sum(v1 * v2)
 
-
+    @cython.boundscheck(False)
     cpdef np.ndarray compare(self,list graph_list, list selected):
         """Compute the all-pairs kernel values for a list of graphs.
         This function can be used to directly compute the kernel
@@ -84,8 +85,9 @@ cdef class ShortestPathGraphKernel(Base):
         cdef int n = len(graph_list)
         cdef double[:,:] k = np.zeros((n, n))
         cdef int cpu_count = self.cpu_count
-        cdef list adjacency_matrices = [[None for i in range(n)]for j in range(n)]
         cdef int i,j
+        cdef list adjacency_matrices = [[None for i in range(n)]for j in range(n)]
+        
         for i in range(n):
             for j in range(i, n):
                 adjacency_matrices[i][j] = get_adjacency(graph_list[i],graph_list[j])

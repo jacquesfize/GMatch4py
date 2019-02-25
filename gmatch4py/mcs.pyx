@@ -5,6 +5,7 @@ from .graph cimport Graph
 from .base cimport Base
 from cython.parallel cimport prange,parallel
 from .helpers.general import parsenx2graph
+cimport cython
 
 cdef class MCS(Base):
     """
@@ -27,7 +28,8 @@ cdef class MCS(Base):
                     comparison_matrix[i, j] = 0.
                 comparison_matrix[j, i] = comparison_matrix[i, j]
         return comparison_matrix
-    
+
+    @cython.boundscheck(False)
     cpdef np.ndarray compare(self,list listgs, list selected):
         cdef int n = len(listgs)
         cdef double [:,:] comparison_matrix = np.zeros((n, n))
@@ -54,20 +56,4 @@ cdef class MCS(Base):
         
         return np.array(comparison_matrix)
 
-    def s_mcs(self,G, H):
-        """
-        Return the MCS measure value between
-        Parameters
-        ----------
-        G : networkx.Graph
-            First Graph
-        H : networkx.Graph
-            Second Graph
-
-        Returns
-        -------
-
-        """
-
-        return len(self.mcs(G, H)) / float(max(len(G), len(H)))
 

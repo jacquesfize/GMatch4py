@@ -117,7 +117,7 @@ cdef class AbstractGraphEditDistance(Base):
         cdef long[:] n_nodes = np.array([g.size() for g in listgs])
         cdef double[:] selected_test = np.array(self.get_selected_array(selected,n))
         cdef int i,j
-        val=np.inf
+        cdef float inf=np.inf
 
         with nogil, parallel(num_threads=self.cpu_count):
             for i in prange(n,schedule='static'):
@@ -126,6 +126,6 @@ cdef class AbstractGraphEditDistance(Base):
                         with gil:
                             comparison_matrix[i][j] = self.distance_ged(listgs[i],listgs[j])
                     else:
-                        comparison_matrix[i][j] = 0
+                        comparison_matrix[i][j] = inf
                 #comparison_matrix[j, i] = comparison_matrix[i, j]
         return np.array(comparison_matrix)

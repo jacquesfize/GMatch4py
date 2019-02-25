@@ -4,6 +4,8 @@ cimport numpy as np
 from ..base cimport Base
 from cython.parallel cimport prange,parallel
 from ..helpers.general import parsenx2graph
+cimport cython
+
 cdef class BP_2(Base):
 
 
@@ -49,6 +51,7 @@ cdef class BP_2(Base):
 
         return comparison_matrix
 
+    @cython.boundscheck(False)
     cpdef np.ndarray compare(self,list listgs, list selected):
         cdef int n = len(listgs)
         cdef list new_gs=parsenx2graph(listgs)

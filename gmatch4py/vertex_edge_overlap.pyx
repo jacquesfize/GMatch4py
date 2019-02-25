@@ -6,7 +6,7 @@ from .base cimport Base,intersection
 from .graph cimport Graph
 from cython.parallel cimport prange,parallel
 from .helpers.general import parsenx2graph
-
+cimport cython
 cdef class VertexEdgeOverlap(Base):
 
     """
@@ -39,6 +39,7 @@ cdef class VertexEdgeOverlap(Base):
                 comparison_matrix[j, i] = comparison_matrix[i, j]
         return comparison_matrix
 
+    @cython.boundscheck(False)
     cpdef np.ndarray compare(self,list listgs, list selected):
         cdef int n = len(listgs)
         cdef list new_gs=parsenx2graph(listgs,self.node_attr_key,self.edge_attr_key)
