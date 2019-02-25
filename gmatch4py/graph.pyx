@@ -22,7 +22,7 @@ cdef class Graph:
                 for id1 in G.adj:
                     for id2 in G.adj[id1]:
                         for id3 in G.adj[id1][id2]:
-                            G._adj[id1][id2][id3]["id"]=i
+                            G._adj[id1][id2][id3]["id"]=str(i)
                             i+=1
             self.is_edge_attr = True
             edge_attr_key = "id"  
@@ -91,7 +91,7 @@ cdef class Graph:
                 if self.is_edge_attr:
                     if self.is_directed:
                         in_edge=list(G.in_edges(n,data=True))
-                        out_edge=list(G.in_edges(n,data=True))
+                        out_edge=list(G.out_edges(n,data=True))
                         for n1,n2,attr_dict in in_edge:
                             self.degree_per_attr[attr_dict[self.edge_attr_key]][n]["in"]+=1
                             self.degree_per_attr_weighted[attr_dict[self.edge_attr_key]][n]["in"]+=1*(attr_dict["weight"] if "weight" in attr_dict else 1 )
@@ -169,10 +169,10 @@ cdef class Graph:
         return "_".join(sorted([n1,attr_value]))
 
     cpdef str hash_edge_attr(self,str n1,str n2, str attr_value):
-        if not self.is_directed:
+        if self.is_directed:
             return "_".join([n1,n2,attr_value])
         ed=sorted([n1,n2])
-        ed.extend(attr_value)
+        ed.extend([attr_value])
         return "_".join(ed)
     
     ## EXIST FUNCTION

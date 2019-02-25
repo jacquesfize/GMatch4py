@@ -58,6 +58,7 @@ this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+requirements=["numpy","networkx","scipy",'scikit-learn','tqdm','pandas']
 setup(
     name="GMatch4py",
     author="Jacques Fize",
@@ -68,9 +69,9 @@ setup(
     packages=["gmatch4py","gmatch4py.helpers"],
     ext_modules=extensions,
     cmdclass={'build_ext': build_ext},
-    setup_requires=["numpy","networkx","scipy",'scikit-learn'],
-    install_requires=["numpy","networkx","scipy",'scikit-learn'],
-    version="0.2.4.2beta",
+    setup_requires=requirements,
+    install_requires=requirements,
+    version="0.2.4.3beta",
     classifiers=[
             "Programming Language :: Python :: 3",
             "License :: OSI Approved :: MIT License",

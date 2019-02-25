@@ -28,7 +28,7 @@ cd GMatch4py
 In `GMatch4py`, algorithms manipulate `networkx.Graph`, a complete graph model that 
 comes with a large spectrum of parser to load your graph from various inputs : `*.graphml,*.gexf,..` (check [here](https://networkx.github.io/documentation/stable/reference/readwrite/index.html) to see all the format accepted)
 
-### Use Gmatch4py
+### Use GMatch4py
 If you want to use algorithms like *graph edit distances*, here is an example:
 
 ```python
@@ -44,7 +44,7 @@ g1=nx.complete_bipartite_graph(5,4)
 g2=nx.complete_bipartite_graph(6,4)
 ```
 
-All graph matching algorithms in `Gmatch4py work this way:
+All graph matching algorithms in `Gmatch4py` work this way:
  * Each algorithm is associated with an object, each object having its specific parameters. In this case, the parameters are the edit costs (delete a vertex, add a vertex, ...)
  * Each object is associated with a `compare()` function with two parameters. First parameter is **a list of the graphs** you want to **compare**, i.e. measure the distance/similarity (depends on the algorithm). Then, you can specify a sample of graphs to be compared to all the other graphs. To this end, the second parameter should be **a list containing the indices** of these graphs (based on the first parameter list). If you rather compute the distance/similarity **between all graphs**, just use the `None` value.
 
@@ -68,7 +68,16 @@ ged.similarity(result)
 ged.distance(result)
 ```
 
+## Exploit nodes and edges attributes
 
+In this latest version, we add the possibility to exploit graph attributes ! To do so, the `base.Base` is extended with the `set_attr_graph_used(node_attr,edge_attr)` method.
+
+```python
+import networkx as nx 
+import gmatch4py as gm
+ged = gm.GraphEditDistance(1,1,1,1)
+ged.set_attr_graph_used("theme","color") # Edge colors and node themes attributes will be used.
+```
 
 ## List of algorithms
 
@@ -115,6 +124,6 @@ each code is associated with a reference to the original.**
 
 ## TODO List
 
-  * Debug algorithms --> Random Walk Kernel
+  * Debug algorithms --> Random Walk Kernel, Deltacon
   * Optimize algorithms --> Vertex Ranking
   * Write the documentation :runner:

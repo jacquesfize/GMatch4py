@@ -7,7 +7,7 @@ notifications:
 
 install:
     - pip install -q cython numpy networkx scipy scikit-learn pandas
-    - python setup.py build_ext --inplace
+    - pip install .
 
 script:
   - pytest test/test.py
