@@ -4,31 +4,31 @@
 import os
 import sys
 import random
-import networkx as nx
+
 from io import open
 from argparse import ArgumentParser, FileType, ArgumentDefaultsHelpFormatter
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor
 import logging
+from multiprocessing import cpu_count
 
-import graph as graph2
-import walks as serialized_walks
-from gensim.models import Word2Vec
-from skipgram import Skipgram
-
+import networkx as nx
+import numpy as np
+cimport numpy as np
 from six import text_type as unicode
 from six import iteritems
 from six.moves import range
 
-cimport cython
+from gensim.models import Word2Vec
 from sklearn.metrics.pairwise import cosine_similarity
-from ..base cimport Base
-import numpy as np
-cimport numpy as np
-
-import psutil
-from multiprocessing import cpu_count
 from joblib import Parallel, delayed
+import psutil
+
+cimport cython
+from ..base cimport Base
+import graph as graph2
+import walks as serialized_walks
+from skipgram import Skipgram
 
 
 p = psutil.Process(os.getpid())
@@ -42,6 +42,36 @@ except AttributeError:
 
 
 def process(gr, number_walks = 10, walk_length = 40, window_size = 5, vertex_freq_degree = False, workers = 1, representation_size = 64, max_memory_data_size = 1000000000, seed = 0):
+    """
+    Return a DeepWalk embedding for a graph
+    
+    Parameters
+    ----------
+    gr : nx.Graph
+        graph
+    number_walks : int, optional
+        Number of walk (the default is 10)
+    walk_length : int, optional
+        Length of the random walk started at each node (the default is 40)
+    window_size : int, optional
+        Window size of skipgram model. (the default is 5)
+    vertex_freq_degree : bool, optional
+        Use vertex degree to estimate the frequency of nodes (the default is False)
+    workers : int, optional
+        Number of parallel processes (the default is 1)
+    representation_size : int, optional
+        Number of latent dimensions to learn for each node (the default is 64)
+    max_memory_data_size : int, optional
+        'Size to start dumping walks to disk, instead of keeping them in memory. (the default is 1000000000)
+    seed : int, optional
+        Seed for random walk generator (the default is 0)
+    
+    Returns
+    -------
+    np.array
+        DeepWalk embedding
+    """
+    
     if len(gr.edges())<1:
         return np.zeros((1,representation_size))
     G = graph2.from_networkx(gr.copy(), undirected=gr.is_directed())
@@ -115,6 +145,20 @@ cdef class DeepWalk(Base):
         Base.__init__(self,0,True)
 
     def extract_embedding(self, listgs):
+        """
+        Extract DeepWalk embedding of each graph in `listgs`
+        
+        Parameters
+        ----------
+        listgs : list
+            list of graphs
+        
+        Returns
+        -------
+        list
+            list of embeddings
+        """
+        
         from tqdm import tqdm
         models =  Parallel(n_jobs = cpu_count())(delayed(process)(nx.Graph(g)) for g in tqdm(listgs,desc="Extracting Embeddings..."))
         return models

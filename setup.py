@@ -49,10 +49,10 @@ def makeExtension(extName):
 
 # get the list of extensions
 extNames = scandir("gmatch4py")
-print(extNames)
+
 # and build up the set of Extension objects
 extensions = cythonize([makeExtension(name) for name in extNames])
-print(extensions)
+
 from os import path
 this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:

@@ -6,7 +6,7 @@ import networkx as nx
 import numpy as np
 cimport numpy as np
 from .abstract_graph_edit_dist cimport AbstractGraphEditDistance
-from ..base cimport intersection,union_
+
 
 
 cdef class GraphEditDistance(AbstractGraphEditDistance):

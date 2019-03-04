@@ -17,6 +17,3 @@ cdef class Base:
 
     cpdef set_attr_graph_used(self, str node_attr_key, str edge_attr_key)
 
-
-cpdef intersection(G,H)
-cpdef union_(G,H)

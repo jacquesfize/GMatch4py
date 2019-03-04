@@ -110,50 +110,11 @@ cdef class ShortestPathGraphKernel(Base):
 
         return np.nan_to_num(k_norm)
 
-    cpdef np.ndarray compare_single_core(self,list graph_list, list selected):
-        """Compute the all-pairs kernel values for a list of graphs.
-        This function can be used to directly compute the kernel
-        matrix for a list of graphs. The direct computation of the
-        kernel matrix is faster than the computation of all individual
-        pairwise kernel values.
-        Parameters
-        ----------
-        graph_list: list
-            A list of graphs (list of networkx graphs)
-        Return
-        ------
-        K: numpy.array, shape = (len(graph_list), len(graph_list))
-        The similarity matrix of all graphs in graph_list.
-        """
-        cdef int n = len(graph_list)
-        cdef double[:,:] k = np.zeros((n, n))
-        
-        cdef list adjacency_matrices = [[None for i in range(n)]for j in range(n)]
-        cdef int i,j
-        for i in range(n):
-            for j in range(i, n):
-                adjacency_matrices[i][j] = get_adjacency(graph_list[i],graph_list[j])
-                adjacency_matrices[j][i] = adjacency_matrices[i][j]
-
-        for i in range(n):
-            for j in range(i, n):
-                if len(graph_list[i]) > 0 and len(graph_list[j]) >0: 
-                    a,b=adjacency_matrices[i][j]
-                    k[i][j] = self.compare_two(a,b)
-                k[j][i] = k[i][j]
-
-        k_norm = np.zeros((n,n))
-        for i in range(n):
-            for j in range(i,n):
-                k_norm[i, j] = k[i][j] / np.sqrt(k[i][i] * k[j][j])
-                k_norm[j, i] = k_norm[i, j]
-        
-        return np.nan_to_num(k_norm)
 
     
-cdef class ShortestPathGraphKernelDotMatrix(ShortestPathGraphKernel):
+cdef class ShortestPathGraphKernelDotCostMatrix(ShortestPathGraphKernel):
     """
-    Shorthest path graph kernel.
+    Instead of just multiply the count of distance values fou,d between nodes of each graph, this version propose to multiply the node distance matrix generated from each graph.
     """
     def __init__(self):
         ShortestPathGraphKernel.__init__(self)

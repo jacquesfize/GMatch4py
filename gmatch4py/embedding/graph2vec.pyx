@@ -1,13 +1,15 @@
 import hashlib
 import json
 import glob
+
 import pandas as pd
 import networkx as nx
 from tqdm import tqdm
 cimport numpy as np
+import numpy.distutils.system_info as sysinfo
+
 from joblib import Parallel, delayed
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
-import numpy.distutils.system_info as sysinfo
 from sklearn.metrics.pairwise import cosine_similarity
 
 from ..base cimport Base
@@ -21,10 +23,18 @@ class WeisfeilerLehmanMachine:
     def __init__(self, graph, features, iterations):
         """
         Initialization method which executes feature extraction.
-        :param graph: The Nx graph object.
-        :param features: Feature hash table.
-        :param iterations: Number of WL iterations.
+        
+        Parameters
+        ----------
+        graph : nx.Graph
+            graph
+        features : dict
+            Feature hash table.
+        iterations : int
+            number of WL iteration
+        
         """
+
         self.iterations = iterations
         self.graph = graph
         self.features = features
@@ -35,8 +45,13 @@ class WeisfeilerLehmanMachine:
     def do_a_recursion(self):
         """
         The method does a single WL recursion.
-        :return new_features: The hash table with extracted WL features.
+        
+        Returns
+        -------
+        dict
+            The hash table with extracted WL features.
         """
+
         new_features = {}
         for node in self.nodes:
             nebs = self.graph.neighbors(node)
@@ -58,11 +73,17 @@ class WeisfeilerLehmanMachine:
 
 def dataset_reader(graph):
     """
-    Function to read the graph and features from a json file.
-    :param path: The path to the graph json.
-    :return graph: The graph object.
-    :return features: Features hash table.
-    :return name: Name of the graph.
+    Function to extract features from a networkx graph
+    
+    Parameters
+    ----------
+    graph : nx.Graph
+        graph
+    
+    Returns
+    -------
+    dict
+        Features hash table.
     """
 
     features = dict(nx.degree(graph))
@@ -70,13 +91,26 @@ def dataset_reader(graph):
     features = {k:v for k,v, in features.items()}
     return graph, features
 
+
 def feature_extractor(graph, ix, rounds):
     """
-    Function to extract WL features from a graph.
-    :param path: The path to the graph json.
-    :param rounds: Number of WL iterations.
-    :return doc: Document collection object.
+    Function to extract WL features from a graph
+    
+    Parameters
+    ----------
+    graph : nx.Graph
+        graph
+    ix : int
+        index of the graph in the dataset
+    rounds : int
+        number of WL iterations
+    
+    Returns
+    -------
+    TaggedDocument 
+        random walks
     """
+
     graph, features = dataset_reader(graph)
     machine = WeisfeilerLehmanMachine(graph,features,rounds)
     doc = TaggedDocument(words = machine.extracted_features , tags = ["g_{0}".format(ix)])
@@ -87,8 +121,32 @@ def feature_extractor(graph, ix, rounds):
 def generate_model(graphs, iteration = 2, dimensions = 64, min_count = 5, down_sampling =  0.0001, learning_rate = 0.0001, epochs = 10, workers = 4 ):
     """
     Main function to read the graph list, extract features, learn the embedding and save it.
-    :param args: Object with the arguments.
+    
+    Parameters
+    ----------
+    graphs : nx.Graph
+        Input graph
+    iteration : int, optional
+        number of iteration (the default is 2)
+    dimensions : int, optional
+        output vector dimension (the default is 64)
+    min_count : int, optional
+        min count parameter of Doc2vec model (the default is 5)
+    down_sampling : float, optional
+        Down sampling rate for frequent features. (the default is 0.0001)
+    learning_rate : float, optional
+        Initial learning rate (the default is 0.0001, which [default_description])
+    epochs : int, optional
+        Number of epochs (the default is 10)
+    workers : int, optional
+        Number of workers (the default is 4)
+    
+    Returns
+    -------
+    [type]
+        [description]
     """
+
     document_collections = Parallel(n_jobs = workers)(delayed(feature_extractor)(g, ix,iteration) for ix,g in tqdm(enumerate(graphs),desc="Extracting Features..."))
     graphs=[nx.relabel_nodes(g,{node:str(node) for node in list(g.nodes)},copy=True) for g in graphs]
     model = Doc2Vec(document_collections,
