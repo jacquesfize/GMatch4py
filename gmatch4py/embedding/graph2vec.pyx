@@ -89,7 +89,7 @@ def generate_model(graphs, iteration = 2, dimensions = 64, min_count = 5, down_s
     Main function to read the graph list, extract features, learn the embedding and save it.
     :param args: Object with the arguments.
     """
-    document_collections = Parallel(n_jobs = workers)(delayed(feature_extractor)(g, ix,iteration) for ix,g in tqdm(enumerate(graphs),desc="Extracting Features..."))
+    document_collections = [feature_extractor(g, ix,iteration) for ix,g in tqdm(enumerate(graphs),desc="Extracting Features...")]
     graphs=[nx.relabel_nodes(g,{node:str(node) for node in list(g.nodes)},copy=True) for g in graphs]
     model = Doc2Vec(document_collections,
                     vector_size = dimensions,
