@@ -166,7 +166,7 @@ cdef class Graph:
         return "_".join([n1,n2])
 
     cpdef str hash_node_attr(self,str n1, str attr_value):
-        return "_".join(sorted([n1,attr_value]))
+        return "_".join([n1,attr_value])
 
     cpdef str hash_edge_attr(self,str n1,str n2, str attr_value):
         if self.is_directed:

@@ -149,3 +149,40 @@ cdef class ShortestPathGraphKernel(Base):
                 k_norm[j, i] = k_norm[i, j]
         
         return np.nan_to_num(k_norm)
+
+    
+cdef class ShortestPathGraphKernelDotMatrix(ShortestPathGraphKernel):
+    """
+    Shorthest path graph kernel.
+    """
+    def __init__(self):
+        ShortestPathGraphKernel.__init__(self)
+    
+    def compare_two(self,g_1, g_2):
+        """Compute the kernel value (similarity) between two graphs.
+        Parameters
+        ----------
+        g1 : networkx.Graph
+            First graph.
+        g2 : networkx.Graph
+            Second graph.
+        Returns
+        -------
+        k : The similarity value between g1 and g2.
+        """
+        # Diagonal superior matrix of the floyd warshall shortest
+        # paths:
+        if isinstance(g_1,nx.Graph) and isinstance(g_2,nx.Graph):
+            g_1,g_2= get_adjacency(g_1,g_2)
+
+        fwm1 = np.array(floyd_warshall(g_1))
+        fwm1[np.isinf(fwm1)] = 0
+        fwm1[np.isnan(fwm1)] = 0 
+        fwm1 = np.triu(fwm1, k=1)
+
+        fwm2 = np.array(floyd_warshall(g_2))
+        fwm2[np.isinf(fwm2)] = 0
+        fwm2[np.isnan(fwm2)] = 0 
+        fwm2 = np.triu(fwm2, k=1)
+        
+        return np.sum(fwm1 * fwm2)

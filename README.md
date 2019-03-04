@@ -117,7 +117,8 @@ Jacques Fize, *jacques[dot]fize[at]cirad[dot]fr*
 Some algorithms from other projects were integrated to Gmatch4py. **Be assured that
 each code is associated with a reference to the original.**
 
-## CHANGELOG
+## CHANGELOG
+
 ### 25.02.2019
  * Add New Graph Class. Features : Cython Extensions, precomputed values (degrees, neighbor info), hash representation of edges and nodes for a faster comparison
  * Some algorithms are parallelized such as graph edit distances or Jaccard

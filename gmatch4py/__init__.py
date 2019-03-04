@@ -9,8 +9,13 @@ from .ged.hausdorff_edit_distance import *
 # Kernels algorithms import
 from .kernels.weisfeiler_lehman import *
 from .kernels.shortest_path_kernel import *
+
+# Graph Embedding import
+from .embedding.graph2vec import *
+from .embedding.deepwalk import *
 # Helpers import
 from .helpers.reader import *
+from .helpers.general import *
 
 # Basic algorithms import
 from .bag_of_cliques import *
