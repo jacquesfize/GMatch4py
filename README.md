@@ -81,11 +81,10 @@ ged.set_attr_graph_used("theme","color") # Edge colors and node themes attribute
 
 ## List of algorithms
 
- * DeltaCon and DeltaCon0 (*debug needed*) [1]
- * Vertex Ranking [2]
- * Vertex Edge Overlap [2]
- * Bag of Nodes (a bag of words model using nodes as vocabulary)
- * Bag of Cliques (a bag of words model using cliques as vocabulary)
+ * Graph Embedding
+    * Graph2Vec [1]
+    * DeepWalk [7]
+
  * Graph kernels
     * Random Walk Kernel (*debug needed*) [3]
         * Geometrical 
@@ -98,17 +97,22 @@ ged.set_attr_graph_used("theme","color") # Edge colors and node themes attribute
     * Hausdorff Graph Edit Distance 
     * Bipartite Graph Edit Distance 
     * Greedy Edit Distance
+ * Vertex Ranking [2]
+ * Vertex Edge Overlap [2]
+ * Bag of Nodes (a bag of words model using nodes as vocabulary)
+ * Bag of Cliques (a bag of words model using cliques as vocabulary)
  * MCS [6]
     
 
 ## Publications associated
 
-  * [1] Koutra, D., Vogelstein, J. T., & Faloutsos, C. (2013, May). Deltacon: A principled massive-graph similarity function. In Proceedings of the 2013 SIAM International Conference on Data Mining (pp. 162-170). Society for Industrial and Applied Mathematics.
+  * [1] Narayanan, Annamalai and Chandramohan, Mahinthan and Venkatesan, Rajasekar and Chen, Lihui and Liu, Yang. Graph2vec: Learning distributed representations of graphs. MLG 2017, 13th International Workshop on Mining and Learning with Graphs (MLGWorkshop 2017).
   * [2] Papadimitriou, P., Dasdan, A., & Garcia-Molina, H. (2010). Web graph similarity for anomaly detection. Journal of Internet Services and Applications, 1(1), 19-30.
   * [3] Vishwanathan, S. V. N., Schraudolph, N. N., Kondor, R., & Borgwardt, K. M. (2010). Graph kernels. Journal of Machine Learning Research, 11(Apr), 1201-1242.
   * [4] Shervashidze, N., Schweitzer, P., Leeuwen, E. J. V., Mehlhorn, K., & Borgwardt, K. M. (2011). Weisfeiler-lehman graph kernels. Journal of Machine Learning Research, 12(Sep), 2539-2561.
   * [5] Fischer, A., Riesen, K., & Bunke, H. (2017). Improved quadratic time approximation of graph edit distance by combining Hausdorff matching and greedy assignment. Pattern Recognition Letters, 87, 55-62.
   * [6] A graph distance metric based on the maximal common subgraph, H. Bunke and K. Shearer, Pattern Recognition Letters, 1998  
+  * [7] Perozzi, B., Al-Rfou, R., & Skiena, S. (2014, August). Deepwalk: Online learning of social representations. In Proceedings of the 20th ACM SIGKDD international conference on Knowledge discovery and data mining (pp. 701-710). ACM.
 
 ## Author(s)
 
