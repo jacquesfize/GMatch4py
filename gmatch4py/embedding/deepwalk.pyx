@@ -116,7 +116,7 @@ cdef class DeepWalk(Base):
 
     def extract_embedding(self, listgs):
         from tqdm import tqdm
-        models =  [process(nx.Graph(g)) for g in tqdm(listgs,desc="Extracting Embeddings...")]
+        models =  Parallel(n_jobs = cpu_count())(delayed(process)(nx.Graph(g)) for g in tqdm(listgs,desc="Extracting Embeddings..."))
         return models
 
     @cython.boundscheck(False)
