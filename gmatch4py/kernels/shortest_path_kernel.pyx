@@ -25,7 +25,7 @@ cdef class ShortestPathGraphKernel(Base):
     Shorthest path graph kernel.
     """
     def __init__(self):
-        Base.__init__(self,0,True)
+        Base.__init__(self,0,False)
     
     def compare_two(self,g_1, g_2):
         """Compute the kernel value (similarity) between two graphs.
