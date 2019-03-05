@@ -1,4 +1,4 @@
-![](logo.png)
+![](logo2.png)
 
 
 [![Build Status](https://travis-ci.com/Jacobe2169/GMatch4py.svg?branch=master)](https://travis-ci.com/Jacobe2169/GMatch4py)
