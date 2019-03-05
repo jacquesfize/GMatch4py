@@ -68,7 +68,7 @@ ged.similarity(result)
 ged.distance(result)
 ```
 
-## Exploit nodes and edges attributes
+## Exploit nodes and edges attributes
 
 In this latest version, we add the possibility to exploit graph attributes ! To do so, the `base.Base` is extended with the `set_attr_graph_used(node_attr,edge_attr)` method.
 
