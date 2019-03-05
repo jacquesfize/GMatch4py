@@ -6,8 +6,9 @@ notifications:
   email: false
 
 install:
-    - pip install -q cython numpy networkx scipy scikit-learn pandas
-    - python setup.py build_ext --inplace
+    - pip install cython numpy networkx scipy scikit-learn pandas gensim joblib gensim psutil --upgrade
+    - pip install .
 
 script:
-  - pytest gmatch4py/test/test.py
+  - echo "1"
+

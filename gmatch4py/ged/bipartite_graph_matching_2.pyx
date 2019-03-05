@@ -2,6 +2,9 @@
 import numpy as np
 cimport numpy as np
 from ..base cimport Base
+from cython.parallel cimport prange,parallel
+from ..helpers.general import parsenx2graph
+cimport cython
 
 cdef class BP_2(Base):
 
@@ -32,21 +35,28 @@ cdef class BP_2(Base):
         self.edge_del = edge_del
         self.edge_ins = edge_ins
 
+
+    @cython.boundscheck(False)
     cpdef np.ndarray compare(self,list listgs, list selected):
         cdef int n = len(listgs)
-        cdef np.ndarray comparison_matrix = np.zeros((n, n)).astype(float)
+        cdef list new_gs=parsenx2graph(listgs)
+        cdef double[:,:] comparison_matrix = np.zeros((n, n))
+        cdef double[:] selected_test = self.get_selected_array(selected,n)
         cdef int i,j
-        for i in range(n):
-            for j in range(i, n):
-                g1,g2=listgs[i],listgs[j]
-                f=self.isAccepted(g1,i,selected)
-                if f:
-                    comparison_matrix[i, j] = self.bp2(g1, g2)
-                else:
-                    comparison_matrix[i, j] = np.inf
-                comparison_matrix[j, i] = comparison_matrix[i, j]
+        cdef long[:] n_nodes = np.array([g.size() for g in new_gs])
+        cdef long[:] n_edges = np.array([g.density() for g in new_gs])
 
-        return comparison_matrix
+        with nogil, parallel(num_threads=self.cpu_count):
+            for i in prange(n,schedule='static'):
+                for j in range(i,n):
+                    if  n_nodes[i] > 0 and n_nodes[j] > 0  and selected_test[i] == 1:
+                        with gil:
+                            comparison_matrix[i, j] = self.bp2(new_gs[i], new_gs[j])
+                    else:
+                        comparison_matrix[i, j] = 0
+                    comparison_matrix[j, i] = comparison_matrix[i, j]
+
+        return np.array(comparison_matrix)
 
 
     cdef double bp2(self, g1, g2):
@@ -55,9 +65,9 @@ cdef class BP_2(Base):
         
         Parameters
         ----------
-        g1 : networkx.Graph
+        g1 : gmatch4py.Graph
             First Graph
-        g2 : networkx.Graph
+        g2 : gmatch4py.Graph
             Second Graph
 
         Returns
@@ -100,8 +110,8 @@ cdef class BP_2(Base):
             list containing costs from the optimal edit path
         """
         cdef list psi_=[]
-        cdef list nodes1 = list(g1.nodes)
-        cdef list nodes2 = list(g2.nodes)
+        cdef list nodes1 = list(g1.nodes())
+        cdef list nodes2 = list(g2.nodes())
         for u in nodes1:
             v=None
             for w in nodes2:
@@ -118,33 +128,25 @@ cdef class BP_2(Base):
         return  psi_
 
 
-    cdef float sum_fuv(self, g1, g2):
-        """
-        Compute Nearest Neighbour Distance between G1 and G2
-        :param g1: First Graph
-        :param g2: Second Graph
-        :return:
-        """
-        cdef np.ndarray min_sum = np.zeros(len(g1))
-        nodes1 = list(g1.nodes)
-        nodes2 = list(g2.nodes)
-        nodes2.extend([None])
-        cdef np.ndarray min_i
-        for i in range(len(nodes1)):
-            min_i = np.zeros(len(nodes2))
-            for j in range(len(nodes2)):
-                min_i[j] = self.fuv(g1, g2, nodes1[i], nodes2[j])
-            min_sum[i] = np.min(min_i)
-        return np.sum(min_sum)
 
-    cdef float fuv(self, g1, g2, n1, n2):
+    cdef float fuv(self, g1, g2, str n1, str n2):
         """
         Compute the Node Distance function
-        :param g1: first graph
-        :param g2: second graph
-        :param n1: node of the first graph
-        :param n2: node of the second graph
-        :return:
+        Parameters
+        ----------
+        g1 : gmatch4py.Graph
+            First graph
+        g2 : gmatch4py.Graph
+            Second graph
+        n1 : int or str
+            identifier of the first node
+        n2 : int or str
+            identifier of the second node
+
+        Returns
+        -------
+        float
+            node distance
         """
         if n2 == None:  # Del
             return self.node_del + ((self.edge_del / 2.) * g1.degree(n1))
@@ -155,31 +157,51 @@ cdef class BP_2(Base):
                 return 0
             return (self.node_del + self.node_ins + self.hed_edge(g1, g2, n1, n2)) / 2
 
-    cdef float hed_edge(self, g1, g2, n1, n2):
+    cdef float hed_edge(self, g1, g2, str n1, str n2):
         """
         Compute HEDistance between edges of n1 and n2, respectively in g1 and g2
-        :param g1: first graph
-        :param g2: second graph
-        :param n1: node of the first graph
-        :param n2: node of the second graph
-        :return:
+        Parameters
+        ----------
+        g1 : gmatch4py.Graph
+            First graph
+        g2 : gmatch4py.Graph
+            Second graph
+        n1 : int or str
+            identifier of the first node
+        n2 : int or str
+            identifier of the second node
+
+        Returns
+        -------
+        float
+            HEDistance between g1 and g2
         """
         return self.sum_gpq(g1, n1, g2, n2) + self.sum_gpq(g1, n1, g2, n2)
 
 
-    cdef float sum_gpq(self, g1, n1, g2, n2):
+    cdef float sum_gpq(self, g1, str n1, g2, str n2):
         """
         Compute Nearest Neighbour Distance between edges around n1 in G1  and edges around n2 in G2
-        :param g1: first graph
-        :param n1: node in the first graph
-        :param g2: second graph
-        :param n2: node in the second graph
-        :return:
+        Parameters
+        ----------
+        g1 : gmatch4py.Graph
+            First graph
+        g2 : gmatch4py.Graph
+            Second graph
+        n1 : int or str
+            identifier of the first node
+        n2 : int or str
+            identifier of the second node
+
+        Returns
+        -------
+        float
+            Nearest Neighbour Distance
         """
 
         #if isinstance(g1, nx.MultiDiGraph):
-        cdef list edges1 = list(g1.edges(n1)) if n1 else []
-        cdef list edges2 =  list(g2.edges(n2)) if n2 else []
+        cdef list edges1 = g1.get_edges_no(n1) if n1 else []
+        cdef list edges2 = g2.get_edges_no(n2) if n2 else []
 
         cdef np.ndarray min_sum = np.zeros(len(edges1))
         edges2.extend([None])
@@ -191,13 +213,21 @@ cdef class BP_2(Base):
             min_sum[i] = np.min(min_i)
         return np.sum(min_sum)
 
-    cdef float gpq(self, tuple e1, tuple e2):
+    cdef float gpq(self, str e1, str e2):
         """
         Compute the edge distance function
-        :param e1: edge1
-        :param e2: edge2
-        :return:
+        Parameters
+        ----------
+        e1 : str
+            first edge identifier
+        e2
+            second edge indentifier
+        Returns
+        -------
+        float
+            edge distance
         """
+
         if e2 == None:  # Del
             return self.edge_del
         if e1 == None:  # Insert

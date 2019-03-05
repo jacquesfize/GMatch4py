@@ -3,6 +3,10 @@
 import numpy as np
 cimport numpy as np
 import networkx as nx
+cimport cython
+import multiprocessing
+
+
 
 cpdef np.ndarray minmax_scale(np.ndarray matrix):
     """
@@ -16,85 +20,6 @@ cpdef np.ndarray minmax_scale(np.ndarray matrix):
     max_=np.max(x)
     return x/(max_)
 
-
-
-cpdef intersection(G, H):
-    """
-    Return a new graph that contains only the edges and nodes that exist in
-    both G and H.
-
-    The node sets of H and G must be the same.
-
-    Parameters
-    ----------
-    G,H : graph
-       A NetworkX graph.  G and H must have the same node sets.
-
-    Returns
-    -------
-    GH : A new graph with the same type as G.
-
-    Notes
-    -----
-    Attributes from the graph, nodes, and edges are not copied to the new
-    graph.  If you want a new graph of the intersection of G and H
-    with the attributes (including edge data) from G use remove_nodes_from()
-    as follows
-
-    >>> G=nx.path_graph(3)
-    >>> H=nx.path_graph(5)
-    >>> R=G.copy()
-    >>> R.remove_nodes_from(n for n in G if n not in H)
-
-    Modified so it can be used with two graphs with different nodes set
-    """
-    # create new graph
-    R = nx.create_empty_copy(G)
-
-    if not G.is_multigraph() == H.is_multigraph():
-        raise nx.NetworkXError('G and H must both be graphs or multigraphs.')
-    if G.number_of_edges() <= H.number_of_edges():
-        if G.is_multigraph():
-            edges = G.edges(keys=True)
-        else:
-            edges = G.edges()
-        for e in edges:
-            if H.has_edge(*e):
-                R.add_edge(*e)
-    else:
-        if H.is_multigraph():
-            edges = H.edges(keys=True)
-        else:
-            edges = H.edges()
-        for e in edges:
-            if G.has_edge(*e):
-                R.add_edge(*e)
-    nodes_g=set(G.nodes())
-    nodes_h=set(H.nodes())
-    R.remove_nodes_from(list(nodes_g - nodes_h))
-    return R
-
-cpdef union_(G, H):
-    """
-    Return a graph that contains nodes and edges from both graph G and H.
-    
-    Parameters
-    ----------
-    G : networkx.Graph
-        First graph
-    H : networkx.Graph 
-        Second graph
-
-    Returns
-    -------
-    networkx.Graph
-        A new graph with the same type as G.
-    """
-    R = nx.create_empty_copy(G)
-    R.add_nodes_from(H.nodes(data=True))
-    R.add_edges_from(G.edges(data=True))
-    R.add_edges_from(H.edges(data=True))
-    return R
 
 cdef class Base:
     """
@@ -115,7 +40,7 @@ cdef class Base:
         self.type_alg=0
         self.normalized=False
 
-    def __init__(self,type_alg,normalized):
+    def __init__(self,type_alg,normalized,node_attr_key="",edge_attr_key=""):
         """
         Constructor of Base
 
@@ -136,6 +61,66 @@ cdef class Base:
         else:
             self.type_alg=type_alg
         self.normalized=normalized
+        self.cpu_count=multiprocessing.cpu_count()
+        self.node_attr_key=node_attr_key
+        self.edge_attr_key=edge_attr_key
+
+    cpdef set_attr_graph_used(self, str node_attr_key, str edge_attr_key):
+        """
+        Set graph attribute used by the algorithm to compare graphs.
+        Parameters
+        ----------
+        node_attr_key : str
+            key of the node attribute
+        edge_attr_key: str
+            key of the edge attribute
+
+        """
+        self.node_attr_key=node_attr_key
+        self.edge_attr_key=edge_attr_key
+    
+    cpdef np.ndarray get_selected_array(self,selected,size_corpus):
+        """
+        Return an array which define which graph will be compared in the algorithms.
+        Parameters
+        ----------
+        selected : list
+            indices of graphs you wish to compare
+        size_corpus : 
+            size of your dataset
+
+        Returns
+        -------
+        np.ndarray
+            selected vector (1 -> selected, 0 -> not selected)
+        """
+        cdef double[:] selected_test = np.zeros(size_corpus)
+        if not selected == None:
+            for ix in range(len(selected)):
+                selected_test[selected[ix]]=1
+            return np.array(selected_test)
+        else:
+            return np.array(selected_test)+1
+        
+
+    cpdef np.ndarray compare_old(self,list listgs, list selected):
+        """
+        Soon will be depreciated ! To store the old version of an algorithm.
+        Parameters
+        ----------
+        listgs : list
+            list of graphs
+        selected
+            selected graphs
+
+        Returns
+        -------
+        np.ndarray
+            distance/similarity matrix
+        """
+        pass
+
+    @cython.boundscheck(False) 
     cpdef np.ndarray compare(self,list graph_list, list selected):
         """
         Return the similarity/distance matrix using the current algorithm.
@@ -153,7 +138,7 @@ cdef class Base:
             the None value
         Returns
         -------
-        np.array
+        np.ndarray
             distance/similarity matrix
             
         """
@@ -164,12 +149,12 @@ cdef class Base:
         Return a normalized distance matrix
         Parameters
         ----------
-        matrix : np.array
-            Similarity/distance matrix you want to transform
+        matrix : np.ndarray
+            Similarity/distance matrix you wish to transform
 
         Returns
         -------
-        np.array
+        np.ndarray
             distance matrix
         """
         if self.type_alg == 1:
@@ -186,8 +171,8 @@ cdef class Base:
         Return a normalized similarity matrix
         Parameters
         ----------
-        matrix : np.array
-            Similarity/distance matrix you want to transform
+        matrix : np.ndarray
+            Similarity/distance matrix you wish to transform
 
         Returns
         -------
@@ -201,30 +186,12 @@ cdef class Base:
                 matrix=np.ma.getdata(minmax_scale(matrix))
             return 1-matrix
 
-    def mcs(self, G, H):
-        """
-        Return the Most Common Subgraph of
-        Parameters
-        ----------
-        G : networkx.Graph
-            First Graph
-        H : networkx.Graph
-            Second Graph
-
-        Returns
-        -------
-        networkx.Graph
-            Most common Subgrah
-        """
-        R=G.copy()
-        R.remove_nodes_from(n for n in G if n not in H)
-        return R
 
     cpdef bint isAccepted(self,G,index,selected):
         """
         Indicate if the graph will be compared to the other. A graph is "accepted" if :
-         * G exists(!= None) and not empty (|vertices(G)| >0)
-         * If selected graph to compare were indicated, check if G exists in selected
+            * G exists(!= None) and not empty (|vertices(G)| >0)
+            * If selected graph to compare were indicated, check if G exists in selected
         
         Parameters
         ----------
@@ -244,7 +211,7 @@ cdef class Base:
         if not G:
             f=False
         elif len(G)== 0:
-           f=False
+            f=False
         if selected:
             if not index in selected:
                 f=False

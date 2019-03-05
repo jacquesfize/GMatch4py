@@ -9,7 +9,7 @@ cimport numpy as np
 from scipy.sparse import csr_matrix,lil_matrix
 import sys
 
-from .base cimport Base,intersection
+from .base cimport Base
 
 
 cdef class BagOfCliques(Base):

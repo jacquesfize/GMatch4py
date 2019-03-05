@@ -1,1 +1,0 @@
-name = "gmatch4py"

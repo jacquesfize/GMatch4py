@@ -4,6 +4,7 @@ import sys
 from .graph_edit_dist cimport GraphEditDistance
 import numpy as np
 cimport numpy as np
+from cython.parallel cimport prange,parallel
 
 cdef class GreedyEditDistance(GraphEditDistance):
     """
@@ -20,15 +21,6 @@ cdef class GreedyEditDistance(GraphEditDistance):
 
     cdef list edit_costs(self, G, H):
         cdef np.ndarray cost_matrix=self.create_cost_matrix(G,H)
-        """
-        cdef np.ndarray cost_matrix_2=cost_matrix.copy()
-        cdef list psi=[]
-        for i in range(len(cost_matrix)):
-            phi_i=np.argmin((cost_matrix[i]))
-            cost_matrix=np.delete(cost_matrix,phi_i,1)
-            psi.append([i,phi_i+i]) #+i to compensate the previous column deletion
-        return [cost_matrix_2[psi[i][0]][psi[i][1]] for i in range(len(psi))]
-        """
         cdef np.ndarray cost_matrix_2=cost_matrix.copy().astype(np.double)
         cdef list psi=[]
         for i in range(len(cost_matrix)):

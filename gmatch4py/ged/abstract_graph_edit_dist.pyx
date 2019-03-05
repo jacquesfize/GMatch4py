@@ -2,11 +2,23 @@
 from __future__ import print_function
 
 import sys
+import warnings
 
 import numpy as np
-from scipy.optimize import linear_sum_assignment
 cimport numpy as np
+import networkx as nx
+from cython.parallel cimport prange,parallel
+
+try:
+    from munkres import munkres
+except ImportError:
+    warnings.warn("To obtain optimal results install the Cython 'munkres' module at  https://github.com/jfrelinger/cython-munkres-wrapper")
+    from scipy.optimize import linear_sum_assignment as munkres
+
 from ..base cimport Base
+from ..helpers.general import parsenx2graph
+
+
 
 cdef class AbstractGraphEditDistance(Base):
 
@@ -22,8 +34,19 @@ cdef class AbstractGraphEditDistance(Base):
 
     cpdef double distance_ged(self,G,H):
         """
-        Return the distance between G and H
-        :return: 
+        Return the distance value between G and H
+        
+        Parameters
+        ----------
+        G : gmatch4py.Graph
+            graph
+        H : gmatch4py.Graph
+            graph
+        
+        Returns
+        -------
+        int 
+            distance
         """
         cdef list opt_path = self.edit_costs(G,H)
         return np.sum(opt_path)
@@ -32,12 +55,21 @@ cdef class AbstractGraphEditDistance(Base):
     cdef list edit_costs(self, G, H):
         """
         Return the optimal path edit cost list, to transform G into H
-        :return: 
+        
+        Parameters
+        ----------
+        G : gmatch4py.Graph
+            graph
+        H : gmatch4py.Graph
+            graph
+        
+        Returns
+        -------
+        np.array 
+            edit path
         """
         cdef np.ndarray cost_matrix = self.create_cost_matrix(G,H).astype(float)
-        row_ind,col_ind = linear_sum_assignment(cost_matrix)
-        cdef int f=len(row_ind)
-        return [cost_matrix[row_ind[i]][col_ind[i]] for i in range(f)]
+        return cost_matrix[munkres(cost_matrix)].tolist()
 
     cpdef np.ndarray create_cost_matrix(self, G, H):
         """
@@ -52,9 +84,26 @@ cdef class AbstractGraphEditDistance(Base):
         delete 		| delete -> delete
 
         The delete -> delete region is filled with zeros
+        
+        Parameters
+        ----------
+        G : gmatch4py.Graph
+            graph
+        H : gmatch4py.Graph
+            graph
+        
+        Returns
+        -------
+        np.array 
+            cost matrix
         """
-        cdef int n = G.number_of_nodes()
-        cdef int m = H.number_of_nodes()
+        cdef int n,m
+        try:
+            n = G.number_of_nodes()
+            m = H.number_of_nodes()
+        except:
+            n = G.size()
+            m = H.size()
         cdef np.ndarray cost_matrix = np.zeros((n+m,n+m))
         cdef list nodes1 = list(G.nodes())
         cdef list nodes2 = list(H.nodes())
@@ -74,26 +123,55 @@ cdef class AbstractGraphEditDistance(Base):
         return cost_matrix
 
     cdef double insert_cost(self, int i, int j, nodesH, H):
+        """
+        Return the insert cost of the ith nodes in H
+        
+        Returns
+        -------
+        int
+            insert cost
+        """
         raise NotImplementedError
 
     cdef double delete_cost(self, int i, int j, nodesG, G):
+        """
+        Return the delete cost of the ith nodes in H
+        
+        Returns
+        -------
+        int
+            delete cost
+        """
         raise NotImplementedError
 
     cpdef double substitute_cost(self, node1, node2, G, H):
+        """
+        Return the substitute cost of between the node1 in G and the node2 in H
+        
+        Returns
+        -------
+        int
+            substitution cost
+        """
         raise NotImplementedError
+
 
     cpdef np.ndarray compare(self,list listgs, list selected):
         cdef int n = len(listgs)
-        cdef np.ndarray comparison_matrix = np.zeros((n, n)).astype(float)
+        cdef double[:,:] comparison_matrix = np.zeros((n, n))
+        listgs=parsenx2graph(listgs,self.node_attr_key,self.edge_attr_key)
+        cdef long[:] n_nodes = np.array([g.size() for g in listgs])
+        cdef double[:] selected_test = np.array(self.get_selected_array(selected,n))
         cdef int i,j
-        for i in range(n):
-            for j in range(n):
-                g1,g2=listgs[i],listgs[j]
-                f=self.isAccepted(g1,i,selected)
-                if f:
-                    comparison_matrix[i, j] = self.distance_ged(g1, g2)
-                else:
-                    comparison_matrix[i, j] = np.inf
+        cdef float inf=np.inf
+
+        with nogil, parallel(num_threads=self.cpu_count):
+            for i in prange(n,schedule='static'):
+                for j in range(n):
+                    if n_nodes[i]>0 and n_nodes[j]>0 and selected_test[i] == 1 :
+                        with gil:
+                            comparison_matrix[i][j] = self.distance_ged(listgs[i],listgs[j])
+                    else:
+                        comparison_matrix[i][j] = inf
                 #comparison_matrix[j, i] = comparison_matrix[i, j]
-        np.fill_diagonal(comparison_matrix,0)
-        return comparison_matrix
+        return np.array(comparison_matrix)

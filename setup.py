@@ -42,7 +42,9 @@ def makeExtension(extName):
     
     return Extension(
         extName,
-        [extPath],include_dirs=[np.get_include()],language='c++',libraries=libs
+        [extPath],include_dirs=[np.get_include()],language='c++',libraries=libs,
+        #extra_compile_args = ["-O0", "-fopenmp"],extra_link_args=['-fopenmp']
+
         )
 
 # get the list of extensions
@@ -56,6 +58,7 @@ this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+requirements=["numpy","networkx","scipy",'scikit-learn','tqdm','pandas',"joblib","gensim","psutil"]
 setup(
     name="GMatch4py",
     author="Jacques Fize",
@@ -63,12 +66,12 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     url="https://github.com/Jacobe2169/GMatch4py",
-    packages=["gmatch4py","gmatch4py.helpers"],
+    packages=["gmatch4py"],
     ext_modules=extensions,
     cmdclass={'build_ext': build_ext},
-    setup_requires=["numpy","networkx","scipy",'scikit-learn'],
-    install_requires=["numpy","networkx","scipy",'scikit-learn'],
-    version="0.2.2",
+    setup_requires=requirements,
+    install_requires=requirements,
+    version="0.2.4.3beta",
     classifiers=[
             "Programming Language :: Python :: 3",
             "License :: OSI Approved :: MIT License",

@@ -11,7 +11,7 @@ cdef class BagOfNodes(Base):
     We could call this algorithm Bag of nodes
     """
     def __init__(self):
-            Base.__init__(self,0,True)
+        Base.__init__(self,0,True)
 
     cpdef np.ndarray compare(self,list graph_list, list selected):
         nodes = list()
