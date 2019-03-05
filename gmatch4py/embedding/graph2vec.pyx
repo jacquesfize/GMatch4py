@@ -167,7 +167,7 @@ cdef class Graph2Vec(Base):
     Narayanan, Annamalai and Chandramohan, Mahinthan and Venkatesan, Rajasekar and Chen, Lihui and Liu, Yang 
     MLG 2017, 13th International Workshop on Mining and Learning with Graphs (MLGWorkshop 2017)
 
-    Orignal Code : https://github.com/benedekrozemberczki/graph2vec
+    Original Code : https://github.com/benedekrozemberczki/graph2vec
 
     Modified by : Jacques Fize
     """
