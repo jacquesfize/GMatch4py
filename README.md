@@ -122,6 +122,14 @@ each code is associated with a reference to the original.**
 
 ## CHANGELOG
 
+### 05.03.2019
+
+ * Add Graph Embedding algorithms
+ * Remove depreciated methods and classes
+ * Add logo
+ * Update documentation
+
+
 ### 25.02.2019
  * Add New Graph Class. Features : Cython Extensions, precomputed values (degrees, neighbor info), hash representation of edges and nodes for a faster comparison
  * Some algorithms are parallelized such as graph edit distances or Jaccard
