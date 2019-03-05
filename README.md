@@ -1,7 +1,8 @@
-
 ![](logo.png)
 
-[![Build Status](https://travis-ci.com/Jacobe2169/GMatch4py.svg?branch=graph_cython)](https://travis-ci.com/Jacobe2169/GMatch4py)
+
+[![Build Status](https://travis-ci.com/Jacobe2169/GMatch4py.svg?branch=master)](https://travis-ci.com/Jacobe2169/GMatch4py)
+# GMatch4py a graph matching library for Python 
 
 
 GMatch4py is a library dedicated to graph matching. Graph structure are stored in NetworkX graph objects.
@@ -120,6 +121,7 @@ Jacques Fize, *jacques[dot]fize[at]cirad[dot]fr*
 Some algorithms from other projects were integrated to Gmatch4py. **Be assured that
 each code is associated with a reference to the original.**
 
+
 ## CHANGELOG
 
 ### 05.03.2019
@@ -138,4 +140,13 @@ each code is associated with a reference to the original.**
 
   * Debug algorithms --> Random Walk Kernel, Deltacon
   * Optimize algorithms --> Vertex Ranking
-  * Write the documentation :runner:
+=======
+## Improvements
+
+GMatch4py is going through some heavy changes to diminish the time execution of each algorithm. You may found an alpha version available in the branch `graph_cython`.
+
+As of today, the results are promising (up to ![](https://latex.codecogs.com/gif.latex?%5Ctimes)36 for Jaccard)
+![](https://i.ibb.co/qMZRHhN/multiplicator-2.png)
+## TODO List
+
+  * Debug algorithms --> :runner: (almost done !)
