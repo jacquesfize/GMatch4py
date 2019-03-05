@@ -1,4 +1,4 @@
-cdlanguage: python
+language: python
 python:
   - "3.6"
 
@@ -10,4 +10,4 @@ install:
     - pip install .
 
 script:
-  - cd ../; pytest GMatch4py/test/test.py
+  - pytest test/test.py
