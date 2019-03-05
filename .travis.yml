@@ -1,4 +1,4 @@
-language: python
+cdlanguage: python
 python:
   - "3.6"
 
@@ -6,8 +6,8 @@ notifications:
   email: false
 
 install:
-    - pip install -q cython numpy networkx scipy scikit-learn pandas gensim joblib gensim psutil
+    - pip install -q cython numpy networkx scipy scikit-learn pandas gensim joblib gensim psutil --upgrade
     - pip install .
 
 script:
-  - pytest test/test.py
+  - cd ../; pytest GMatch4py/test/test.py
