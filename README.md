@@ -84,6 +84,7 @@ ged.set_attr_graph_used("theme","color") # Edge colors and node themes attribute
 
  * Graph Embedding
     * Graph2Vec [1]
+ * Node Embedding
     * DeepWalk [7]
  * Graph kernels
     * Random Walk Kernel (*debug needed*) [3]

@@ -136,7 +136,7 @@ cdef class DeepWalk(Base):
         keywords = {deep learning, latent representations, learning with partial labels, network classification, online learning, social networks},
     }
 
-    Orignal Code : https://github.com/phanein/deepwalk
+    Original Code : https://github.com/phanein/deepwalk
 
     Modified by : Jacques Fize
     """
