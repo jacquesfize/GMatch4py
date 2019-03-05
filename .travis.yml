@@ -6,7 +6,7 @@ notifications:
   email: false
 
 install:
-    - pip install -q cython numpy networkx scipy scikit-learn pandas gensim joblib gensim psutil --upgrade
+    - pip install cython numpy networkx scipy scikit-learn pandas gensim joblib gensim psutil --upgrade
     - pip install .
 
 script:

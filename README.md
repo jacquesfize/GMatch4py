@@ -5,12 +5,9 @@ GMatch4py is a library dedicated to graph matching. Graph structure are stored i
 GMatch4py algorithms were implemented with Cython to enhance performance.
 
 ## Requirements
- 
- * Python 3.x
- * Cython
- * networkx
- * numpy
- * scikit-learn
+
+ * Python 3
+ * Numpy and Cython installed (if not : `(sudo) pip(3) install numpy cython`)
  
 ## Installation
 
