@@ -13,6 +13,7 @@ from .kernels.shortest_path_kernel import *
 # Graph Embedding import
 from .embedding.graph2vec import *
 from .embedding.deepwalk import *
+from .embedding.node2vec import *
 # Helpers import
 from .helpers.reader import *
 from .helpers.general import *

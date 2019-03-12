@@ -86,6 +86,7 @@ ged.set_attr_graph_used("theme","color") # Edge colors and node themes attribute
     * Graph2Vec [1]
  * Node Embedding
     * DeepWalk [7]
+    * Node2vec [8]
  * Graph kernels
     * Random Walk Kernel (*debug needed*) [3]
         * Geometrical 
@@ -114,6 +115,7 @@ ged.set_attr_graph_used("theme","color") # Edge colors and node themes attribute
   * [5] Fischer, A., Riesen, K., & Bunke, H. (2017). Improved quadratic time approximation of graph edit distance by combining Hausdorff matching and greedy assignment. Pattern Recognition Letters, 87, 55-62.
   * [6] A graph distance metric based on the maximal common subgraph, H. Bunke and K. Shearer, Pattern Recognition Letters, 1998  
   * [7] Perozzi, B., Al-Rfou, R., & Skiena, S. (2014, August). Deepwalk: Online learning of social representations. In Proceedings of the 20th ACM SIGKDD international conference on Knowledge discovery and data mining (pp. 701-710). ACM.
+  * [8] node2vec: Scalable Feature Learning for Networks. Aditya Grover and Jure Leskovec. Knowledge Discovery and Data Mining, 2016.
 
 ## Author(s)
 
@@ -124,6 +126,10 @@ each code is associated with a reference to the original.**
 
 
 ## CHANGELOG
+
+### 12.03.2019
+
+ * Add Node2vec
 
 ### 05.03.2019
 

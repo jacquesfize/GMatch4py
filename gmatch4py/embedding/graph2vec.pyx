@@ -173,7 +173,7 @@ cdef class Graph2Vec(Base):
     """
 
     def __init__(self):
-        Base.__init__(self,0,True)
+        Base.__init__(self,0,False)
 
     @cython.boundscheck(False)
     cpdef np.ndarray compare(self,list listgs, list selected):

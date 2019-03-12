@@ -142,7 +142,7 @@ cdef class DeepWalk(Base):
     """
 
     def __init__(self):
-        Base.__init__(self,0,True)
+        Base.__init__(self,0,False)
 
     def extract_embedding(self, listgs):
         """

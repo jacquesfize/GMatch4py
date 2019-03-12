@@ -71,7 +71,7 @@ setup(
     cmdclass={'build_ext': build_ext},
     setup_requires=requirements,
     install_requires=requirements,
-    version="0.2.4.3beta",
+    version="0.2.5b",
     classifiers=[
             "Programming Language :: Python :: 3",
             "License :: OSI Approved :: MIT License",
