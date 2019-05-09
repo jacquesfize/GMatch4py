@@ -1,6 +1,7 @@
 # coding = utf-8
 import sys, os, glob, json, re
 import networkx as nx
+from tqdm import tqdm
 
 
 """
@@ -66,7 +67,7 @@ def import_dir(directory,format="gexf",numbered=True):
         graphs= [nx.Graph()]*(n+1)
 
     association_map, i = {}, 0
-    for fn in fns:
+    for fn in tqdm(fns,desc="Loading Graphs from {0}".format(directory)):
         if not numbered:
             graphs.append(methods_read_graph[format](fn))
             association_map[fn]=i

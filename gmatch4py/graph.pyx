@@ -108,14 +108,14 @@ cdef class Graph:
                             self.degree_per_attr_weighted[attr_dict[self.edge_attr_key]][n]["in"]+=1*(attr_dict["weight"] if "weight" in attr_dict else 1 )
                             self.degree_per_attr_weighted[attr_dict[self.edge_attr_key]][n]["out"]+=1*(attr_dict["weight"] if "weight" in attr_dict else 1 )
             
-            
             self.nodes_degree=np.array(degree_all)
             self.nodes_degree_in=np.array(degree_in)
             self.nodes_degree_out=np.array(degree_out)
 
-            self.nodes_degree_weighted=np.array(degree_all_weighted)
-            self.nodes_degree_in_weighted=np.array(degree_in_weighted)
-            self.nodes_degree_out_weighted=np.array(degree_out_weighted)
+            self.nodes_degree_weighted=np.array(degree_all_weighted).astype(np.double)
+            self.nodes_degree_in_weighted=np.array(degree_in_weighted).astype(np.double)
+            self.nodes_degree_out_weighted=np.array(degree_out_weighted).astype(np.double)
+
 
             # EDGE INFO INIT
             #################
@@ -282,36 +282,36 @@ cdef class Graph:
     cpdef int density_attr(self, str attr_val):
         return self.number_of_edges_per_attr[attr_val]
 
-    cpdef int degree(self,str n_id, bint weight=False):
+    cpdef double degree(self,str n_id, bint weight=False):
         if weight:
             return self.nodes_degree_weighted[self.nodes_idx[n_id]]
         return self.nodes_degree[self.nodes_idx[n_id]]
     
-    cpdef int in_degree(self,str n_id, bint weight=False):
+    cpdef double in_degree(self,str n_id, bint weight=False):
         if weight:
             return self.nodes_degree_in_weighted[self.nodes_idx[n_id]]
         return self.nodes_degree_in[self.nodes_idx[n_id]]
     
-    cpdef int out_degree(self,str n_id, bint weight=False):
+    cpdef double out_degree(self,str n_id, bint weight=False):
         if weight:
             return self.nodes_degree_out_weighted[self.nodes_idx[n_id]]
         return self.nodes_degree_out[self.nodes_idx[n_id]]
 
-    cpdef int in_degree_attr(self,str n_id,str attr_val, bint weight=False):
+    cpdef double in_degree_attr(self,str n_id,str attr_val, bint weight=False):
         if not self.is_edge_attr and not self.is_directed:
             raise AttributeError("No edge attribute have been defined")
         if weight:
             return self.degree_per_attr_weighted[attr_val][n_id]["in"]
         return self.degree_per_attr[attr_val][n_id]["in"]
 
-    cpdef int out_degree_attr(self,str n_id,str attr_val, bint weight=False):
+    cpdef double out_degree_attr(self,str n_id,str attr_val, bint weight=False):
         if not self.is_edge_attr and not self.is_directed:
             raise AttributeError("No edge attribute have been defined")
         if weight:
             return self.degree_per_attr_weighted[attr_val][n_id]["out"]
         return self.degree_per_attr[attr_val][n_id]["out"]
 
-    cpdef int degree_attr(self,str n_id,str attr_val, bint weight=False):
+    cpdef double degree_attr(self,str n_id,str attr_val, bint weight=False):
         if not self.is_edge_attr:
             raise AttributeError("No edge attribute have been defined")
         if not self.is_directed:
@@ -371,7 +371,7 @@ cdef class Graph:
 
     def __init_empty__(self):
         self.nodes_list,self.nodes_attr_list,self.nodes_hash,self.nodes_weight,self.attr_nodes=[],[],[],[],[]
-        self.nodes_degree,self.nodes_degree_in,self.nodes_degree_out,self.nodes_degree_weighted,self.nodes_degree_in_weighted,self.nodes_degree_out_weighted=np.array([],dtype=np.long),np.array([],dtype=np.long),np.array([],dtype=np.long),np.array([],dtype=np.long),np.array([],dtype=np.long),np.array([],dtype=np.long)
+        self.nodes_degree,self.nodes_degree_in,self.nodes_degree_out,self.nodes_degree_weighted,self.nodes_degree_in_weighted,self.nodes_degree_out_weighted=np.array([],dtype=np.long),np.array([],dtype=np.long),np.array([],dtype=np.long),np.array([],dtype=np.double),np.array([],dtype=np.double),np.array([],dtype=np.double)
         self.nodes_idx,self.degree_per_attr,self.degree_per_attr_weighted={},{},{}
         self.nodes_hash_set=set([])
         self.number_of_nodes = 0

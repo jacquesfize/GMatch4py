@@ -51,6 +51,26 @@ cdef class AbstractGraphEditDistance(Base):
         cdef list opt_path = self.edit_costs(G,H)
         return np.sum(opt_path)
 
+    def edit_path(self,G,H):
+        """
+        Return  the edit path along with the cost matrix and the selected indices from the Munkres Algorithm
+        
+        Parameters
+        ----------
+        G : nx.Graph
+            first graph
+        H : nx.Graph
+            second graph
+        
+        Returns
+        -------
+        np.array(1D), np.array(2D), (np.array(2D) if munkres) or (np.array(1,2) if scipy) 
+            edit_path, cost_matrix, munkres results
+        """
+        cost_matrix = self.create_cost_matrix(G,H).astype(float)
+        index_path= munkres(cost_matrix)
+        return cost_matrix[index_path], cost_matrix, index_path
+    
 
     cdef list edit_costs(self, G, H):
         """

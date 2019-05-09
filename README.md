@@ -57,7 +57,6 @@ print(result)
 
 The output is a similarity/distance matrix :
 ```python
-Out[10]:
 array([[0., 14.],
        [10., 0.]])
 ```
@@ -126,6 +125,11 @@ each code is associated with a reference to the original.**
 
 
 ## CHANGELOG
+### 7.05.2019
+
+ * Debug (problems with float edge weight)
+ * Add the `AbstractEditDistance.edit_path(G,H)` method that return the edit path, the cost matrix and the selected cost index in the cost matrix
+ * Add a tqdm progress bar for the `gmatch4py.helpers.reader.import_dir()` function
 
 ### 12.03.2019
 

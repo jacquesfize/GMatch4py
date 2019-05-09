@@ -32,9 +32,9 @@ cdef class Graph:
     cdef long[:] nodes_degree # degree list
     cdef long[:] nodes_degree_in # in degree list
     cdef long[:] nodes_degree_out # out degree list
-    cdef long[:] nodes_degree_weighted #weighted vers. of nodes_degree
-    cdef long[:] nodes_degree_in_weighted #weighted vers. of nodes_degree_in
-    cdef long[:] nodes_degree_out_weighted #weighted vers. of nodes_degree_out
+    cdef double[:] nodes_degree_weighted #weighted vers. of nodes_degree
+    cdef double[:] nodes_degree_in_weighted #weighted vers. of nodes_degree_in
+    cdef double[:] nodes_degree_out_weighted #weighted vers. of nodes_degree_out
     cdef dict degree_per_attr # degree information per attr val
     cdef dict degree_per_attr_weighted # degree information per attr val
     cdef list attr_nodes # list of attr(dict) values for each node
@@ -97,13 +97,13 @@ cdef class Graph:
 
     # DEGREE FUNCTION
     #################
-    cpdef int degree(self,str n_id, bint weight=*)
-    cpdef int in_degree(self,str n_id, bint weight=*)
-    cpdef int out_degree(self,str n_id, bint weight=*)
+    cpdef double degree(self,str n_id, bint weight=*)
+    cpdef double in_degree(self,str n_id, bint weight=*)
+    cpdef double out_degree(self,str n_id, bint weight=*)
 
-    cpdef int in_degree_attr(self,str n_id,str attr_val, bint weight=*)
-    cpdef int out_degree_attr(self,str n_id,str attr_val, bint weight=*)
-    cpdef int degree_attr(self,str n_id,str attr_val, bint weight=*)
+    cpdef double in_degree_attr(self,str n_id,str attr_val, bint weight=*)
+    cpdef double out_degree_attr(self,str n_id,str attr_val, bint weight=*)
+    cpdef double degree_attr(self,str n_id,str attr_val, bint weight=*)
 
     ## GETTER
     #########
