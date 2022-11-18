@@ -125,6 +125,12 @@ each code is associated with a reference to the original.**
 
 
 ## CHANGELOG
+
+### 18.06.2022
+ * Debug the `skipgram` import
+ * Gmatch4py should work with new gensim version
+
+
 ### 7.05.2019
 
  * Debug (problems with float edge weight)

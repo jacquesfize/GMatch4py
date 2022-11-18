@@ -28,7 +28,7 @@ cimport cython
 from ..base cimport Base
 import graph as graph2
 import walks as serialized_walks
-from skipgram import Skipgram
+from .skipgram import Skipgram
 
 
 p = psutil.Process(os.getpid())
@@ -86,7 +86,7 @@ def process(gr, number_walks = 10, walk_length = 40, window_size = 5, vertex_fre
         walks = graph2.build_deepwalk_corpus(G, num_paths=number_walks,
                                             path_length=walk_length, alpha=0, rand=random.Random(seed))
         #print("Training...")
-        model = Word2Vec(walks, size=representation_size,
+        model = Word2Vec(walks, vector_size=representation_size,
                             window=window_size, min_count=0, sg=1, hs=1, workers=workers)
     else:
         #print("Data size {} is larger than limit (max-memory-data-size: {}).  Dumping walks to disk.".format(
