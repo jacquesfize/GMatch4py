@@ -1,8 +1,5 @@
-from collections import Counter, Mapping
-from concurrent.futures import ProcessPoolExecutor
 import logging
 from multiprocessing import cpu_count
-from six import string_types
 
 from gensim.models import Word2Vec
 
