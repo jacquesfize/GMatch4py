@@ -11,7 +11,13 @@ from time import time
 from glob import glob
 from six.moves import range, zip, zip_longest
 from six import iterkeys
-from collections import defaultdict, Iterable
+
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
+from collections import defaultdict
+
 import random
 from random import shuffle
 from itertools import product,permutations
